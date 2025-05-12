@@ -2,6 +2,7 @@ name: Parallel IDs with Serial Hosts
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   run-per-id:
