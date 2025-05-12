@@ -8,9 +8,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - id: group1
-            hosts: "host1,host2"
-          - id: group2
+          - id: pod_001
+            hosts: "g1-host1,g1-host2,g1-host3,g1-host4"
+          - id: pod_002
             hosts: "host3,host4"
 
     runs-on: ubuntu-latest
@@ -23,5 +23,5 @@ jobs:
           for host in "${HOSTS[@]}"; do
             echo "Processing host: $host"
             # Simulate some work
-            sleep 2
+            sleep 10
           done
