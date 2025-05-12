@@ -78,55 +78,127 @@ jobs:
       #     print("\n✅ All hosts processed.")
       #   shell: python
 
-      - name: Run hosts serially with retries (Python)
-        run: |
-          import sys
-          import time
+      # - name: Run hosts serially with retries (Python)
+      #   run: |
+      #     import sys
+      #     import time
       
-          id = "${{ matrix.id }}"
-          hosts = ${{ toJson(matrix.hosts) }}
+      #     id = "${{ matrix.id }}"
+      #     hosts = ${{ toJson(matrix.hosts) }}
       
-          print(f"🔧 Running tasks for group: {id}")
-          print("====================================")
+      #     print(f"🔧 Running tasks for group: {id}")
+      #     print("====================================")
       
-          def process_host(host):
-              # Simulate a task that might fail
-              if host == "host2":
-                  raise Exception("Simulated failure")
-              print(f"✅ Task succeeded on {host}")
+      #     def process_host(host):
+      #         # Simulate a task that might fail
+      #         if host == "host2":
+      #             raise Exception("Simulated failure")
+      #         print(f"✅ Task succeeded on {host}")
       
-          failed_hosts = []
+      #     failed_hosts = []
       
-          for index, host in enumerate(hosts, start=1):
-              print(f"\n🔹 Step {index}: Processing host: {host}")
-              print("----------------------------------------")
-              attempts = 0
-              success = False
+      #     for index, host in enumerate(hosts, start=1):
+      #         print(f"\n🔹 Step {index}: Processing host: {host}")
+      #         print("----------------------------------------")
+      #         attempts = 0
+      #         success = False
       
-              while attempts < 3:
-                  try:
-                      print(f"Attempt {attempts + 1} for host: {host}")
-                      process_host(host)
-                      success = True
-                      break
-                  except Exception as e:
-                      print(f"⚠️ Error on host {host}: {e}")
-                      attempts += 1
-                      if attempts < 3:
-                          print("🔁 Retrying...")
-                          time.sleep(10)  # Optional delay between retries
+      #         while attempts < 3:
+      #             try:
+      #                 print(f"Attempt {attempts + 1} for host: {host}")
+      #                 process_host(host)
+      #                 success = True
+      #                 break
+      #             except Exception as e:
+      #                 print(f"⚠️ Error on host {host}: {e}")
+      #                 attempts += 1
+      #                 if attempts < 3:
+      #                     print("🔁 Retrying...")
+      #                     time.sleep(10)  # Optional delay between retries
       
-              if not success:
-                  print(f"❌ Failed to process host {host} after 3 attempts.")
-                  failed_hosts.append(host)
+      #         if not success:
+      #             print(f"❌ Failed to process host {host} after 3 attempts.")
+      #             failed_hosts.append(host)
       
-          if failed_hosts:
-              print(f"\n❌ Group '{id}' failed on the following hosts: {', '.join(failed_hosts)}")
-              sys.exit(1)
+      #     if failed_hosts:
+      #         print(f"\n❌ Group '{id}' failed on the following hosts: {', '.join(failed_hosts)}")
+      #         sys.exit(1)
       
-          print("\n✅ All hosts in group processed successfully.")
-        shell: python
+      #     print("\n✅ All hosts in group processed successfully.")
+      #   shell: python
 
+    - name: Run hosts serially with retries and time check (Python)
+      run: |
+        import sys
+        import time
+        import os
+        from datetime import datetime, timezone
+    
+        # Inputs
+        id = "${{ matrix.id }}"
+        hosts = ${{ toJson(matrix.hosts) }}
+        start_time_raw = "${{ github.event.inputs.start_time }}"
+        end_time_raw = "${{ github.event.inputs.end_time }}"
+    
+        def parse_utc(timestamp):
+            if not timestamp:
+                return None
+            return datetime.fromisoformat(timestamp).replace(tzinfo=timezone.utc)
+    
+        now = datetime.now(timezone.utc)
+        start_time = parse_utc(start_time_raw)
+        end_time = parse_utc(end_time_raw)
+    
+        # Enforce start time
+        if start_time and now < start_time:
+            print(f"⏳ Current time is before start_time ({start_time}), skipping.")
+            sys.exit(0)
+    
+        print(f"🔧 Running tasks for group: {id}")
+        print(f"🕒 Current time (UTC): {now.isoformat()}")
+        print("====================================")
+    
+        def process_host(host):
+            # Simulated task logic
+            if host == "host4":
+                raise Exception("Simulated failure")
+            print(f"✅ Task succeeded on {host}")
+    
+        failed_hosts = []
+    
+        for index, host in enumerate(hosts, start=1):
+            if end_time and datetime.now(timezone.utc) > end_time:
+                print(f"⏹️ End time {end_time} reached. Aborting further processing.")
+                sys.exit(1)
+    
+            print(f"\n🔹 Step {index}: Processing host: {host}")
+            print("----------------------------------------")
+            attempts = 0
+            success = False
+    
+            while attempts < 3:
+                try:
+                    print(f"Attempt {attempts + 1} for host: {host}")
+                    process_host(host)
+                    success = True
+                    break
+                except Exception as e:
+                    print(f"⚠️ Error on host {host}: {e}")
+                    attempts += 1
+                    if attempts < 3:
+                        print("🔁 Retrying...")
+                        time.sleep(1)
+    
+            if not success:
+                print(f"❌ Failed to process host {host} after 3 attempts.")
+                failed_hosts.append(host)
+    
+        if failed_hosts:
+            print(f"\n❌ Group '{id}' failed on the following hosts: {', '.join(failed_hosts)}")
+            sys.exit(1)
+    
+        print("\n✅ All hosts in group processed successfully.")
+      shell: python
 
 
 
