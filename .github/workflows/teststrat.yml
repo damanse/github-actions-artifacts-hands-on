@@ -1,0 +1,30 @@
+name: Parallel IDs with Serial Hosts
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-per-id:
+    strategy:
+      matrix:
+        include:
+          - id: pod_001
+            hosts: '["host1", "host2"]'
+          - id: pod_002
+            hosts: '["host3", "host4"]'
+
+    runs-on: ubuntu-latest
+    name: Process ${{ matrix.id }}
+    steps:
+      - name: Print ID
+        run: echo "Processing ID: ${{ matrix.id }}"
+
+      - name: Process hosts serially
+        run: |
+          echo '${{ matrix.hosts }}' > hosts.json
+          hosts=$(jq -r '.[]' hosts.json)
+          for host in $hosts; do
+            echo "Processing host: $host"
+            # Add your actual commands here
+            sleep 1
+          done
