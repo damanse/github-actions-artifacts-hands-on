@@ -7,6 +7,12 @@ on:
       config_json:
         description: 'JSON input like [{"id":"group1","hosts":["host1","host2"]}]'
         required: true
+      start_time:
+        description: 'Start time (UTC, e.g. 2025-05-12T15:00:00)'
+        required: false
+      end_time:
+        description: 'End time (UTC, e.g. 2025-05-12T16:00:00)'
+        required: false
 
 jobs:
   setup:
