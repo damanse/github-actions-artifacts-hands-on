@@ -1,5 +1,5 @@
 # .github/workflows/dynamic-matrix.yml
-name: Dynamic Matrix Builder
+name: Option2 Dynamic Matrix Builder
 
 on:
   workflow_dispatch:
