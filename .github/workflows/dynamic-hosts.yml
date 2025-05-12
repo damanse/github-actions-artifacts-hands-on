@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include: ${{ fromJson(github.event.client_payload.matrix) }}
+        include: ${{ fromJson(github.event.client_payload.matrix_json) }}
 
     name: Run for ${{ matrix.id }}
     steps:
