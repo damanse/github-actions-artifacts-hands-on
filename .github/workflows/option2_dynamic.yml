@@ -1,0 +1,42 @@
+# .github/workflows/dynamic-matrix.yml
+name: Dynamic Matrix Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_json:
+        description: 'JSON input like [{"id":"group1","hosts":["host1","host2"]}]'
+        required: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Parse config JSON and set matrix
+        id: set-matrix
+        run: |
+          # Assume valid JSON input from workflow_dispatch
+          echo '${{ github.event.inputs.config_json }}' > matrix.json
+
+          # Minify it to ensure it's valid and compact (no newlines or extra spaces)
+          MATRIX=$(jq -c '.' matrix.json)
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  run-groups:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.setup.outputs.matrix) }}
+
+    name: Run for ${{ matrix.id }}
+    steps:
+      - name: Run hosts serially
+        run: |
+          echo "Running ID: ${{ matrix.id }}"
+          for host in ${{ join(matrix.hosts, ' ') }}; do
+            echo "  Processing host: $host"
+            sleep 1
+          done
