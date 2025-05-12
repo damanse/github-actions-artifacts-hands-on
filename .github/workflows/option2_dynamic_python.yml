@@ -1,0 +1,83 @@
+# .github/workflows/dynamic-matrix.yml
+name: Option2 Dynamic Matrix Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_json:
+        description: 'JSON input like [{"id":"group1","hosts":["host1","host2"]}]'
+        required: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Parse config JSON and set matrix
+        id: set-matrix
+        run: |
+          # Assume valid JSON input from workflow_dispatch
+          echo '${{ github.event.inputs.config_json }}' > matrix.json
+
+          # Minify it to ensure it's valid and compact (no newlines or extra spaces)
+          MATRIX=$(jq -c '.' matrix.json)
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  run-groups:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.setup.outputs.matrix) }}
+
+    name: Run for ${{ matrix.id }}
+    steps:
+      # - name: Run hosts serially
+      #   run: |
+      #     echo "Running ID: ${{ matrix.id }}"
+      #     index=1
+      #     for host in ${{ join(matrix.hosts, ' ') }}; do
+      #       echo ""
+      #       echo "🔹 Step $index: Running task on host: $host"
+      #       echo "-------------------------------------------"
+      #       # Simulate task (replace with real logic)
+      #       if [[ "$host" == "host4" ]]; then
+      #         echo "❌ Simulated failure on $host"
+      #         exit 1  # Optional: fail early
+      #       fi
+      #       echo "✅ Finished processing $host"
+      #       echo "-------------------------------------------"
+      #       index=$((index + 1))
+      #     done
+        - name: Run hosts serially (Python)
+          run: |
+            import sys
+        
+            id = "${{ matrix.id }}"
+            hosts = ${{ toJson(matrix.hosts) }}
+        
+            print(f"🔧 Running tasks for group: {id}")
+            print("====================================")
+        
+            for index, host in enumerate(hosts, start=1):
+                print(f"\n🔹 Step {index}: Processing host: {host}")
+                print("----------------------------------------")
+        
+                try:
+                    # Simulate some work
+                    if host == "host2":
+                        raise Exception(f"Simulated failure on {host}")
+                    print(f"✅ Successfully processed {host}")
+                except Exception as e:
+                    print(f"❌ Error on host {host}: {e}")
+                    sys.exit(1)  # Or skip failure with: `continue`
+        
+            print("\n✅ All hosts processed.")
+          shell: python
+
+
+
+
+
+    
