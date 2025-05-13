@@ -32,10 +32,10 @@ jobs:
       #   with:
       #     start_time: ${{ inputs.start_time }}
       #     end_time: ${{ inputs.end_time }}
-     - name: ⏰ Check Time Window for ${{ matrix.host }}
+      - name: ⏰ Check Time Window for ${{ matrix.host }}
         run: |
           echo "Checking time window..."
-
+  
           python3 <<EOF
           from datetime import datetime
           import sys
@@ -54,8 +54,7 @@ jobs:
               print("⛔ Outside time window. Skipping upgrade for this host.")
               sys.exit(0) 
           EOF
-   
-
+     
       # - name: Install Ansible
       #   run: |
       #     sudo apt-get update
