@@ -1,45 +1,42 @@
-# .github/workflows/handle-pod.yml
-
-name: Handle Pod
+name: Main Workflow
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      pod:
-        required: true
-        type: string
-      hosts:
+      site:
+        description: 'Site to process'
         required: true
         type: string
       start_time:
+        description: 'Start of allowed time window (UTC HH:MM)'
         required: true
-        type: string  # Format: HH:MM (24-hour)
+        default: '10:30'
       end_time:
+        description: 'End of allowed time window (UTC HH:MM)'
         required: true
-        type: string  # Format: HH:MM (24-hour)
+        default: '11:30'
 
 jobs:
-  fanout-hosts:
+  get-pods:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      max-parallel: 1
-      matrix:
-        host: ${{ fromJson(inputs.hosts) }}
-    name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Check time window
+      - name: Get pods (mock)
+        id: set-matrix
         run: |
-          now=$(date -u +%H:%M)
-          echo "Current UTC time: $now"
-          echo "Allowed time window: ${{ inputs.start_time }} to ${{ inputs.end_time }}"
+          # Replace this mock logic with your real pod/host generator
+          POD_JSON='[{"pod":"251","hosts":["host1","host2"]}]'
+          echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
 
-          if [[ "$now" < "${{ inputs.start_time }}" || "$now" > "${{ inputs.end_time }}" ]]; then
-            echo "::error ::Outside allowed time window. Exiting."
-            exit 1
-          fi
-
-      - name: Run something on ${{ matrix.host }}
-        run: |
-          echo "Processing host: ${{ matrix.host }} from pod: ${{ inputs.pod }}"
-          sleep 1
+  run-pods:
+    needs: get-pods
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
+    uses: ./.github/workflows/handle-pod.yml
+    with:
+      pod: ${{ matrix.pod }}
+      hosts: ${{ toJson(matrix.hosts) }}
+      start_time: ${{ inputs.start_time }}
+      end_time: ${{ inputs.end_time }}
