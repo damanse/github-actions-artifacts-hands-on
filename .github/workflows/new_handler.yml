@@ -58,11 +58,11 @@ jobs:
               print(f"🔁 Attempt {attempt} of {max_attempts} for host: {host}")
           
               try:
-                  # result = subprocess.run([
-                  #     "ansible-playbook",
-                  #     "upgrade-playbook.yml",
-                  #     "--extra-vars", f"target_host={host}"
-                  # ], check=True)
+                  result = subprocess.run([
+                      "ansible-playbook",
+                      "upgrade-playbook.yml",
+                      "--extra-vars", f"target_host={host}"
+                  ], check=True)
                   
                   time.sleep(30)
                   
