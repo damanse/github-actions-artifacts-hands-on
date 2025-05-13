@@ -52,6 +52,7 @@ jobs:
           import subprocess
           import time
           import sys
+          import random
           
           host = "${{ matrix.host }}"
           max_attempts = 3
@@ -66,6 +67,10 @@ jobs:
                   #     "upgrade-playbook.yml",
                   #     "--extra-vars", f"target_host={host}"
                   # ], check=True)
+
+                  # Simulate random failure (50% chance)
+                  if random.random() < 0.5:
+                    raise subprocess.CalledProcessError(returncode=1, cmd="simulated failure")
                   
                   time.sleep(30)
                   
