@@ -1,0 +1,9 @@
+# upgrade-playbook.yml
+
+- name: Upgrade host
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Simulate upgrade
+      debug:
+        msg: "Upgrading {{ inventory_hostname }}"
