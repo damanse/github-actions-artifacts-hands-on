@@ -6,4 +6,4 @@
   tasks:
     - name: Simulate upgrade
       debug:
-        msg: "Upgrading {{ inventory_hostname }}"
+        msg: "Upgrading {{ target_host }}"
