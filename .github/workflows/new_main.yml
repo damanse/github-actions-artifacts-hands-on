@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
-    uses: ./.github/workflows/handle-pod.yml
+    uses: ./.github/workflows/new_handler.yml
     with:
       pod: ${{ matrix.pod }}
       hosts: ${{ toJson(matrix.hosts) }}
