@@ -1,6 +1,4 @@
-# .github/workflows/handle-pod.yml
-
-name: Handle Pod Upgrade
+name: Handle Pod
 
 on:
   workflow_call:
@@ -13,13 +11,13 @@ on:
         type: string
       start_time:
         required: true
-        type: string  # Format: HH:MM (24-hour)
+        type: string
       end_time:
         required: true
-        type: string  # Format: HH:MM (24-hour)
+        type: string
 
 jobs:
-  fanout-hosts:
+  upgrade-hosts:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -29,17 +27,49 @@ jobs:
     name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
     steps:
       - name: Check time window
-        run: |
-          now=$(date -u +%H:%M)
-          echo "Current UTC time: $now"
-          echo "Allowed time window: ${{ inputs.start_time }} to ${{ inputs.end_time }}"
+        uses: ./.github/actions/time-window-check
+        with:
+          start_time: ${{ inputs.start_time }}
+          end_time: ${{ inputs.end_time }}
 
-          if [[ "$now" < "${{ inputs.start_time }}" || "$now" > "${{ inputs.end_time }}" ]]; then
-            echo "::error ::Outside allowed time window. Exiting."
-            exit 1
-          fi
-
-      - name: Run something on ${{ matrix.host }}
+      - name: Install Ansible
         run: |
-          echo "Processing host: ${{ matrix.host }} from pod: ${{ inputs.pod }}"
-          sleep 1
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Run Upgrade on ${{ matrix.host }}
+        id: upgrade
+        run: |
+          echo "Running upgrade script on ${{ matrix.host }}"
+
+          python3 <<EOF
+import subprocess
+import time
+import sys
+
+host = "${{ matrix.host }}"
+max_attempts = 3
+sleep_seconds = 5
+
+for attempt in range(1, max_attempts + 1):
+    print(f"🔁 Attempt {attempt} of {max_attempts} for host: {host}")
+
+    try:
+        result = subprocess.run([
+            "ansible-playbook",
+            "upgrade-playbook.yml",
+            "--extra-vars", f"target_host={host}"
+        ], check=True)
+
+        print(f"✅ Upgrade succeeded on attempt {attempt}")
+        sys.exit(0)
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Playbook failed on attempt {attempt} with code {e.returncode}")
+        if attempt < max_attempts:
+            print(f"⏳ Retrying in {sleep_seconds} seconds...")
+            time.sleep(sleep_seconds)
+        else:
+            print("🔥 Upgrade failed after all retries.")
+            sys.exit(1)
+EOF
