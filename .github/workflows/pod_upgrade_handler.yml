@@ -1,4 +1,4 @@
-name: Handle Pod
+name: Upgrade POD
 
 on:
   workflow_call:
