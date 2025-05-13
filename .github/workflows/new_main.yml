@@ -1,0 +1,32 @@
+name: Main Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to process'
+        required: true
+        type: string
+
+jobs:
+  get-pods:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Get pods (mock)
+        id: set-matrix
+        run: |
+          # Replace this with real logic or an Ansible playbook
+          POD_JSON='[{"pod":"251","hosts":["host1","host2"]},{"pod":"group2","hosts":["host3","host4"]}]'
+          echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
+
+  run-pods:
+    needs: get-pods
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
+    uses: ./.github/workflows/handle-pod.yml
+    with:
+      pod: ${{ matrix.pod }}
+      hosts: ${{ toJson(matrix.hosts) }}
