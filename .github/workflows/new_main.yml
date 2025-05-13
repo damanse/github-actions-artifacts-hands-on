@@ -26,7 +26,7 @@ jobs:
         id: set-matrix
         run: |
           # Replace this mock logic with your real pod/host generator
-          POD_JSON='[{"pod":"251","hosts":["host1","host2"]}]'
+          POD_JSON='[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
           echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
 
   run-pods:
