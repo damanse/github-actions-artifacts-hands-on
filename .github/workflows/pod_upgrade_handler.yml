@@ -52,7 +52,7 @@ jobs:
           
           if not (start <= now <= end):
               print("⛔ Outside time window. Skipping upgrade for this host.")
-              sys.exit(0) 
+              sys.exit(1) 
           EOF
      
       # - name: Install Ansible
