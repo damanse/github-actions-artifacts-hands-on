@@ -39,6 +39,9 @@ jobs:
 
       - name: Run Upgrade on ${{ matrix.host }}
         id: upgrade
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
         run: |
           echo "Running upgrade script on ${{ matrix.host }}"
           echo "Checking Start and End time ${{ inputs.start_time }} - ${{ inputs.end_time }}"
