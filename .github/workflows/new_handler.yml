@@ -1,6 +1,6 @@
 # .github/workflows/handle-pod.yml
 
-name: Handle Poddfdfd
+name: Handle Pod Upgrade
 
 on:
   workflow_call:
@@ -10,20 +10,36 @@ on:
         type: string
       hosts:
         required: true
-        type: string  # JSON array as string
+        type: string
+      start_time:
+        required: true
+        type: string  # Format: HH:MM (24-hour)
+      end_time:
+        required: true
+        type: string  # Format: HH:MM (24-hour)
 
 jobs:
-  upgrade-hosts:
+  fanout-hosts:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: true
+      max-parallel: 1
       matrix:
         host: ${{ fromJson(inputs.hosts) }}
-      max-parallel: 1
-      fail-fast: true
     name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
     steps:
+      - name: Check time window
+        run: |
+          now=$(date -u +%H:%M)
+          echo "Current UTC time: $now"
+          echo "Allowed time window: ${{ inputs.start_time }} to ${{ inputs.end_time }}"
+
+          if [[ "$now" < "${{ inputs.start_time }}" || "$now" > "${{ inputs.end_time }}" ]]; then
+            echo "::error ::Outside allowed time window. Exiting."
+            exit 1
+          fi
+
       - name: Run something on ${{ matrix.host }}
         run: |
           echo "Processing host: ${{ matrix.host }} from pod: ${{ inputs.pod }}"
-          # Replace with real command like Ansible
           sleep 1
