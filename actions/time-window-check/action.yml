@@ -1,0 +1,24 @@
+name: Time Window Check
+description: Fails if current UTC time is outside the allowed window.
+
+inputs:
+  start_time:
+    description: Start of allowed time window (HH:MM, 24-hour UTC)
+    required: true
+  end_time:
+    description: End of allowed time window (HH:MM, 24-hour UTC)
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        now=$(date -u +%H:%M)
+        echo "🕓 Current UTC time: $now"
+        echo "⏳ Allowed window: ${{ inputs.start_time }} – ${{ inputs.end_time }}"
+
+        if [[ "$now" < "${{ inputs.start_time }}" || "$now" > "${{ inputs.end_time }}" ]]; then
+          echo "::error ::Outside allowed time window. Exiting."
+          exit 1
+        fi
