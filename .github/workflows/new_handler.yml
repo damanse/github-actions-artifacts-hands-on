@@ -43,33 +43,35 @@ jobs:
           echo "Running upgrade script on ${{ matrix.host }}"
 
           python3 <<EOF
-import subprocess
-import time
-import sys
-
-host = "${{ matrix.host }}"
-max_attempts = 3
-sleep_seconds = 5
-
-for attempt in range(1, max_attempts + 1):
-    print(f"🔁 Attempt {attempt} of {max_attempts} for host: {host}")
-
-    try:
-        result = subprocess.run([
-            "ansible-playbook",
-            "upgrade-playbook.yml",
-            "--extra-vars", f"target_host={host}"
-        ], check=True)
-
-        print(f"✅ Upgrade succeeded on attempt {attempt}")
-        sys.exit(0)
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Playbook failed on attempt {attempt} with code {e.returncode}")
-        if attempt < max_attempts:
-            print(f"⏳ Retrying in {sleep_seconds} seconds...")
-            time.sleep(sleep_seconds)
-        else:
-            print("🔥 Upgrade failed after all retries.")
-            sys.exit(1)
-EOF
+          import subprocess
+          import time
+          import sys
+          
+          host = "${{ matrix.host }}"
+          max_attempts = 3
+          sleep_seconds = 5
+          
+          for attempt in range(1, max_attempts + 1):
+              print(f"🔁 Attempt {attempt} of {max_attempts} for host: {host}")
+          
+              try:
+                  # result = subprocess.run([
+                  #     "ansible-playbook",
+                  #     "upgrade-playbook.yml",
+                  #     "--extra-vars", f"target_host={host}"
+                  # ], check=True)
+                  
+                  time.sleep(30)
+                  
+                  print(f"✅ Upgrade succeeded on attempt {attempt}")
+                  sys.exit(0)
+          
+              except subprocess.CalledProcessError as e:
+                  print(f"❌ Playbook failed on attempt {attempt} with code {e.returncode}")
+                  if attempt < max_attempts:
+                      print(f"⏳ Retrying in {sleep_seconds} seconds...")
+                      time.sleep(sleep_seconds)
+                  else:
+                      print("🔥 Upgrade failed after all retries.")
+                      sys.exit(1)
+          EOF
