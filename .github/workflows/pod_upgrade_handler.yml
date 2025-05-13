@@ -19,6 +19,7 @@ on:
 jobs:
   upgrade-hosts:
     runs-on: ubuntu-latest
+    timeout-minutes: 720
     strategy:
       fail-fast: true
       max-parallel: 1
