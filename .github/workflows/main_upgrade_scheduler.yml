@@ -1,4 +1,4 @@
-name: Main Upgrade Workflow
+name: Main Upgrade Scheduler
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
       fail-fast: false
-    uses: ./.github/workflows/new_handler.yml
+    uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
       pod: ${{ matrix.pod }}
       hosts: ${{ toJson(matrix.hosts) }}
