@@ -1,32 +1,45 @@
-name: Main Workflow
+# .github/workflows/handle-pod.yml
+
+name: Handle Pod
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      site:
-        description: 'Site to process'
+      pod:
         required: true
         type: string
+      hosts:
+        required: true
+        type: string
+      start_time:
+        required: true
+        type: string  # Format: HH:MM (24-hour)
+      end_time:
+        required: true
+        type: string  # Format: HH:MM (24-hour)
 
 jobs:
-  get-pods:
+  fanout-hosts:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Get pods (mock)
-        id: set-matrix
-        run: |
-          # Replace this with real logic or an Ansible playbook
-          POD_JSON='[{"pod":"251","hosts":["host1","host2"]},{"pod":"group2","hosts":["host3","host4"]}]'
-          echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
-
-  run-pods:
-    needs: get-pods
     strategy:
+      fail-fast: true
+      max-parallel: 1
       matrix:
-        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
-    uses: ./.github/workflows/handle-pod.yml
-    with:
-      pod: ${{ matrix.pod }}
-      hosts: ${{ toJson(matrix.hosts) }}
+        host: ${{ fromJson(inputs.hosts) }}
+    name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
+    steps:
+      - name: Check time window
+        run: |
+          now=$(date -u +%H:%M)
+          echo "Current UTC time: $now"
+          echo "Allowed time window: ${{ inputs.start_time }} to ${{ inputs.end_time }}"
+
+          if [[ "$now" < "${{ inputs.start_time }}" || "$now" > "${{ inputs.end_time }}" ]]; then
+            echo "::error ::Outside allowed time window. Exiting."
+            exit 1
+          fi
+
+      - name: Run something on ${{ matrix.host }}
+        run: |
+          echo "Processing host: ${{ matrix.host }} from pod: ${{ inputs.pod }}"
+          sleep 1
