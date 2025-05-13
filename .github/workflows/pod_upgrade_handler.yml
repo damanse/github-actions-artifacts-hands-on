@@ -33,7 +33,7 @@ jobs:
       #     start_time: ${{ inputs.start_time }}
       #     end_time: ${{ inputs.end_time }}
 
-           - name: ⏰ Time window check
+      - name: ⏰ Time window check
         id: time-check
         run: |
           echo "Checking if current time is within allowed window"
