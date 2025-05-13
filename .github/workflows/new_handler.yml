@@ -13,11 +13,13 @@ on:
         type: string  # JSON array as string
 
 jobs:
-  fanout-hosts:
+  upgrade-hosts:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         host: ${{ fromJson(inputs.hosts) }}
+      max-parallel: 1
+      fail-fast: true
     name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
     steps:
       - name: Run something on ${{ matrix.host }}
