@@ -33,6 +33,33 @@ jobs:
       #     start_time: ${{ inputs.start_time }}
       #     end_time: ${{ inputs.end_time }}
 
+           - name: ⏰ Time window check
+        id: time-check
+        run: |
+          echo "Checking if current time is within allowed window"
+
+          python3 <<EOF
+          from datetime import datetime
+          import sys
+          
+          start_time_str = "${{ inputs.start_time }}"
+          end_time_str = "${{ inputs.end_time }}"
+          
+          start = datetime.strptime(start_time_str, "%H:%M").time()
+          end = datetime.strptime(end_time_str, "%H:%M").time()
+          now = datetime.now().time()
+          
+          print(f"Start: {start}, End: {end}, Now: {now}")
+          
+          if now < start or now > end:
+              print("⛔ Outside allowed time window. Skipping upgrade.")
+              # Set output for conditional check
+              print("::set-output name=allowed::false")
+          else:
+              print("✅ Within allowed window. Proceeding.")
+              print("::set-output name=allowed::true")
+          EOF
+
       # - name: Install Ansible
       #   run: |
       #     sudo apt-get update
