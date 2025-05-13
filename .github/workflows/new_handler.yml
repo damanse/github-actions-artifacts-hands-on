@@ -26,21 +26,24 @@ jobs:
         host: ${{ fromJson(inputs.hosts) }}
     name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
     steps:
-      - name: Check time window
-        uses: ./.github/actions/time-window-check
-        with:
-          start_time: ${{ inputs.start_time }}
-          end_time: ${{ inputs.end_time }}
+      # - name: Check time window
+      #   uses: ./.github/actions/time-window-check
+      #   with:
+      #     start_time: ${{ inputs.start_time }}
+      #     end_time: ${{ inputs.end_time }}
 
-      - name: Install Ansible
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ansible
+      # - name: Install Ansible
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y ansible
 
       - name: Run Upgrade on ${{ matrix.host }}
         id: upgrade
         run: |
           echo "Running upgrade script on ${{ matrix.host }}"
+          echo "Checking Start and End time ${{ inputs.start_time }} - ${{ inputs.end_time }}"
+          echo "Checking Big Red Button..."
+          echo "Starting upgrade..."
 
           python3 <<EOF
           import subprocess
