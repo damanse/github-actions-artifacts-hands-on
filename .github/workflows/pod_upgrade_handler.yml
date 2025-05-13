@@ -51,7 +51,7 @@ jobs:
           print(f"Start: {start}, End: {end}, Now: {now}")
           
           if not (start <= now <= end):
-              print("⛔ Outside time window. Skipping upgrade for this host.")
+              print("⛔ Outside time window. Ending Upgrades.")
               sys.exit(1) 
           EOF
      
