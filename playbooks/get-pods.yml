@@ -27,9 +27,11 @@
         dest: /tmp/pods.json
 
     - name: Remove whitespace and wrap content in single quotes
-      run: |
+      shell: |
         sed -z 's/\s//g' /tmp/pods.json | sed "s/^/'/;s/$/'/" > /tmp/pods.json
     
     - name: Debug the contents of pods.json
       debug:
         msg: "{{ lookup('file', '/tmp/pods.json') }}"
+
+
