@@ -2,8 +2,8 @@
 
 - name: Upgrade host
   hosts: localhost
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Simulate upgrade
-      debug:
+      ansible.builtin.debug:
         msg: "Upgrading {{ target_host }}"
