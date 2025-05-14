@@ -20,22 +20,9 @@
               - "host104"
               - "host105"
 
-# - name: Write pod data to JSON file
-    #   ansible.builtin.copy:
-    #     content: '[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
-    #     dest: /tmp/pods_manual.json
-    #     mode: '0644'
-
     - name: Write JSON string to /tmp/pods.json File
       ansible.builtin.copy:
         content: "{{ pods_data | to_json }}"
         dest: /tmp/pods.json
         mode: '0644'
 
-    # - name: Additional Formatting to Remove Spaces
-    #   ansible.builtin.command:
-    #     cmd: "sed -i 's/ //g' /tmp/pods.json"
-
-    # - name: Log File Contents
-    #   ansible.builtin.command:
-    #     cmd: "cat /tmp/pods.json"
