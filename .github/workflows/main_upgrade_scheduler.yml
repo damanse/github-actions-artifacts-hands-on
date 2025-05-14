@@ -35,31 +35,20 @@ jobs:
       pod_json: ${{ steps.set-output.outputs.pod_json }}
 
     steps:
-      - name: 🧰 Checkout repo
+       - name: 🧰 Checkout repo
         uses: actions/checkout@v4
 
-      - name: 🛠️ Run Ansible Playbook to Generate POD_JSON
+      - name: 🛠️ Run Ansible Playbook to Generate pod_output.json
         run: |
           echo "Running Ansible playbook with site=${{ inputs.site }}"
-          
-          # Run the playbook, which should write the result to pod_output.json
           ansible-playbook playbooks/get-pods.yml \
             --extra-vars "site=${{ inputs.site }}"
-
-          # Display contents (for debugging)
-          echo "Output file contents:"
-          cat pod_output.json
 
       - name: 📦 Set pod_json output and clean up
         id: set-output
         run: |
-          # Read the file contents
           POD_JSON=$(cat pod_output.json)
-
-          # Export as GitHub output
           echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
-
-          # Clean up the file
           rm -f pod_output.json
 
   run-pods:
