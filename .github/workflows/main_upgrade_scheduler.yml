@@ -42,6 +42,14 @@ jobs:
       - name: Run Ansible Playbook to Get Pods
         run: |
           ansible-playbook playbooks/get-pods.yml --extra-vars "site=${{ inputs.site }}"
+
+      - name: File Formatting
+        run: |
+          sed -i '' 's/ //g' /tmp/pods.json
+
+      - name: File Debug
+        run: |
+          cat /tmp/pods.json
       
       - name: Read pods from /tmp/pods.json
         id: set-matrix
