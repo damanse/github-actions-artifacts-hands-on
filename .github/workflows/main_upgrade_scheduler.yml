@@ -49,7 +49,8 @@ jobs:
             echo "File exists. Contents of /tmp/pods.json:"
             cat /tmp/pods.json
             echo "Formatting...."
-            sed -z 's/\s//g' /tmp/pods.json > /tmp/pods.min.json
+            # sed -z 's/\s//g' /tmp/pods.json > /tmp/pods.min.json
+            sed -z "s/\(\[\{.*\}\]\)/'\1'/g" /tmp/pods.json > /tmp/pods.min.json
             echo "Contents of /tmp/pods.min.json:"
             cat /tmp/pods.min.json
           else
