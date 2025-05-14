@@ -7,6 +7,7 @@ on:
         description: 'Site to process'
         required: true
         type: string
+        default: 'PG_256'
       start_time:
         description: 'Start of allowed time window (UTC HH:MM)'
         required: true
@@ -17,47 +18,27 @@ on:
         default: '18:30'
 
 jobs:
-  # get-pods:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     matrix: ${{ steps.set-matrix.outputs.pod_json }}
-  #   steps:
-  #     - name: Get pods (mock)
-  #       id: set-matrix
-  #       run: |
-  #         # Replace this mock logic with your real pod/host generator
-  #         POD_JSON='[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
-  #         echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
-
   get-pods:
     runs-on: ubuntu-latest
     outputs:
-      pod_yaml: ${{ steps.set-output.outputs.pod_yaml }}
-
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Ansible Playbook to Generate pod_output.yaml
+      - name: Get pods (mock)
+        id: set-matrix
         run: |
-          ansible-playbook playbooks/get-pods.yml --extra-vars "site=${{ inputs.site }}"
-
-      - name: Set pod_yaml output and clean up
-        id: set-output
-        run: |
-          POD_YAML=$(cat /tmp/pod_output.yaml)
-          echo "pod_yaml=$POD_YAML" >> "$GITHUB_OUTPUT"
-          rm -f /tmp/pod_output.yaml
+          # Replace this mock logic with your real pod/host generator
+          POD_JSON='[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
+          echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
 
   run-pods:
     needs: get-pods
     strategy:
       matrix:
-        pod_group: ${{ fromYaml(needs.get-pods.outputs.pod_yaml) }}
+        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
       fail-fast: false
     uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
-      pod: ${{ matrix.pod_group.pod }}
-      hosts: ${{ toJson(matrix.pod_group.hosts) }}
+      pod: ${{ matrix.pod }}
+      hosts: ${{ toJson(matrix.hosts) }}
       start_time: ${{ inputs.start_time }}
       end_time: ${{ inputs.end_time }}
