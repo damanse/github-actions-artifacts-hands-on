@@ -65,6 +65,15 @@ jobs:
           POD_JSON=$(cat /tmp/pods.json)
           echo "::set-output name=pod_json::$POD_JSON"
 
+  debug-pod-json:
+    runs-on: ubuntu-latest
+    needs: get-pods
+    steps:
+      - name: Debug pod_json
+        run: |
+          echo "pod_json: ${{ needs.get-pods.outputs.pod_json }}"
+
+
 
   run-pods:
     needs: get-pods
