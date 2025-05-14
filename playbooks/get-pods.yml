@@ -18,4 +18,4 @@
     - name: Write pod_data to pod_output.json
       copy:
         content: '{{ pod_data | to_json }}'
-        dest: pod_output.json
+        dest: /tmp/pod_output.json
