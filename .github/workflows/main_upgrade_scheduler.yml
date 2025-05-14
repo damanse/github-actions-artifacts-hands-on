@@ -47,9 +47,9 @@ jobs:
       - name: 📦 Set pod_json output and clean up
         id: set-output
         run: |
-          POD_JSON=$(cat /tmp/pod_output.json)
-          echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
-          rm -f /tmp/pod_output.json
+            POD_JSON=$(cat /tmp/pod_output.json | jq -c)
+            echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
+            rm -f /tmp/pod_output.json
 
   run-pods:
     needs: get-pods
