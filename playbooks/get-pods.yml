@@ -32,9 +32,9 @@
         dest: /tmp/pods.json
         mode: '0644'
 
-    - name: Additional Formatting to Remove Spaces
-      ansible.builtin.command:
-        cmd: "sed -i '' 's/ //g' /tmp/pods.json"
+    # - name: Additional Formatting to Remove Spaces
+    #   ansible.builtin.command:
+    #     cmd: "sed -i '' 's/ //g' /tmp/pods.json"
 
     - name: Log File Contents
       ansible.builtin.command:
