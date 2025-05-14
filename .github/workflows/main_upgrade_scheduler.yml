@@ -33,7 +33,7 @@ jobs:
   get-pods:
     runs-on: ubuntu-latest
     outputs:
-      pod_json: ${{ steps.set-output.outputs.pod_json }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
       - name: Checkout code
@@ -42,28 +42,17 @@ jobs:
       - name: Run Ansible Playbook to Get Pods
         run: |
           ansible-playbook playbooks/get-pods.yml --extra-vars "site=${{ inputs.site }}"
-
-      - name: Check if /tmp/pods.json exists
+      
+      - name: Read pods from /tmp/pods.json
+        id: set-matrix
         run: |
           if [ -f /tmp/pods.json ]; then
-            echo "File exists. Contents of /tmp/pods.json:"
-            cat /tmp/pods.json
+            POD_JSON=$(cat /tmp/pods.json)
+            echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
           else
-            echo "File /tmp/pods.json does not exist."
+            echo "Error: /tmp/pods.json does not exist."
+            exit 1
           fi
-
-      # - name: Set pod_json output
-      #   id: set-output
-      #   run: |
-      #     POD_JSON=$(cat /tmp/pods.json)
-      #     echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
-      #     rm -f /tmp/pods.json
-
-      - name: Set pod_json output
-        id: set-output
-        run: |
-          POD_JSON=$(cat /tmp/pods.json)
-          echo "::set-output name=pod_json::$POD_JSON"
 
   debug-pod-json:
     runs-on: ubuntu-latest
@@ -73,13 +62,11 @@ jobs:
         run: |
           echo "pod_json: ${{ needs.get-pods.outputs.pod_json }}"
 
-
-
   run-pods:
     needs: get-pods
     strategy:
       matrix:
-        pod_group: ${{ fromJson(needs.get-pods.outputs.pod_json) }}
+        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
       fail-fast: false
     uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
