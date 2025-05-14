@@ -38,4 +38,4 @@
 
     - name: Log File Contents
       ansible.builtin.command:
-        cmd: "cat /tmp/pods_code.json"
+        cmd: "cat /tmp/pods.json"
