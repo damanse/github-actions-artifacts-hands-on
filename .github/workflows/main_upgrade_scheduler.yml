@@ -10,11 +10,11 @@ on:
       start_time:
         description: 'Start of allowed time window (UTC HH:MM)'
         required: true
-        default: '10:30'
+        default: '07:30'
       end_time:
         description: 'End of allowed time window (UTC HH:MM)'
         required: true
-        default: '11:30'
+        default: '18:30'
 
 jobs:
   # get-pods:
@@ -43,19 +43,23 @@ jobs:
           echo "Running Ansible playbook with site=${{ inputs.site }}"
           ansible-playbook playbooks/get-pods.yml \
             --extra-vars "site=${{ inputs.site }}"
-
+      
       - name: 📦 Set pod_json output and clean up
         id: set-output
         run: |
-            POD_JSON=$(cat /tmp/pod_output.json | jq -c)
-            echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
-            rm -f /tmp/pod_output.json
+          POD_JSON=$(jq -c . /tmp/pod_output.json)
+          echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
+          rm -f /tmp/pod_output.json
+
+      - name: 🔍 Debug pod_json output
+        run: echo "${{ needs.get-pods.outputs.pod_json }}"
+
 
   run-pods:
     needs: get-pods
     strategy:
       matrix:
-        include: ${{ fromJson(needs.get-pods.outputs.pod_json) }}
+        pod_group: ${{ fromJson(needs.get-pods.outputs.pod_json) }}
       fail-fast: false
     uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
