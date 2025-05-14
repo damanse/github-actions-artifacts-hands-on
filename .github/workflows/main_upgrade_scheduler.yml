@@ -46,9 +46,11 @@ jobs:
       - name: Set pod_json output
         id: set-output
         run: |
+          cat /tmp/pods.json
           POD_JSON=$(cat /tmp/pods.json)
           echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
           rm -f /tmp/pods.json
+          cat $POD_JSON
 
   run-pods:
     needs: get-pods
