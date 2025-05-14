@@ -4,7 +4,7 @@
   gather_facts: false
   tasks:
     - name: Define pod data
-      set_fact:
+      ansible.builtin.set_fact:
         pod_data:
           - pod: "251"
             hosts:
@@ -22,22 +22,16 @@
 
     # - name: Write pod data to JSON file
     #   copy:
-    #     # content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
-    #     content: "{{ pod_data | to_json }}"
+    #     content: '[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
     #     dest: /tmp/pods.json
+    #     mode: '0644'
 
-    # - name: Remove whitespace and wrap content in single quotes
-    #   shell: |
-    #     sed -z 's/\s//g' /tmp/pods.json | sed "s/^/'/;s/$/'/" > /tmp/pods.json
-
-    - name: Write pod data to JSON file
-      copy:
-        content: '[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
+    - name: Write pod data to /tmp/pods.json
+      ansible.builtin.copy:
+        content: "'{{ pod_data | to_json | replace(' ', '') }}'"
         dest: /tmp/pods.json
         mode: '0644'
-    
+
     - name: Debug the contents of pods.json
-      debug:
+      ansible.builtin.debug:
         msg: "{{ lookup('file', '/tmp/pods.json') }}"
-
-
