@@ -25,6 +25,9 @@
         content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
         dest: /tmp/pods.json
 
-    - name: Debug the contents of pods.json
-      debug:
-        msg: "{{ lookup('file', '/tmp/pods.json') }}"
+    - name: Debug the content of pods.json
+      run: cat /tmp/pods.json
+
+    # - name: Debug the contents of pods.json
+    #   debug:
+    #     msg: "{{ lookup('file', '/tmp/pods.json') }}"
