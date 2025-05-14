@@ -20,15 +20,20 @@
               - "host104"
               - "host105"
 
+    # - name: Write pod data to JSON file
+    #   copy:
+    #     # content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
+    #     content: "{{ pod_data | to_json }}"
+    #     dest: /tmp/pods.json
+
+    # - name: Remove whitespace and wrap content in single quotes
+    #   shell: |
+    #     sed -z 's/\s//g' /tmp/pods.json | sed "s/^/'/;s/$/'/" > /tmp/pods.json
+
     - name: Write pod data to JSON file
       copy:
-        # content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
-        content: "{{ pod_data | to_json }}"
-        dest: /tmp/pods.json
-
-    - name: Remove whitespace and wrap content in single quotes
-      shell: |
-        sed -z 's/\s//g' /tmp/pods.json | sed "s/^/'/;s/$/'/" > /tmp/pods.json
+        content: '[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
+        dest: /tmp/pods.json    
     
     - name: Debug the contents of pods.json
       debug:
