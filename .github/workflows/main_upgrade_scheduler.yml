@@ -63,13 +63,7 @@ jobs:
         id: set-output
         run: |
           POD_JSON=$(cat /tmp/pods.json)
-          echo "pod_json=$POD_JSON" >> $GITHUB_ENV
-
-      - name: Debug the contents of GITHUB_OUTPUT
-        run: |
-          echo "Contents of GITHUB_OUTPUT:"
-          cat $GITHUB_ENV
-
+          echo "::set-output name=pod_json::$POD_JSON
 
   run-pods:
     needs: get-pods
