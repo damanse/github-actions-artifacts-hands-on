@@ -33,7 +33,8 @@
     - name: Write pod data to JSON file
       copy:
         content: '[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
-        dest: /tmp/pods.json    
+        dest: /tmp/pods.json
+        mode: '0644'
     
     - name: Debug the contents of pods.json
       debug:
