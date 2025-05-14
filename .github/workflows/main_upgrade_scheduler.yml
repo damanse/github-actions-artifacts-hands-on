@@ -20,7 +20,7 @@ jobs:
   # get-pods:
   #   runs-on: ubuntu-latest
   #   outputs:
-  #     matrix: ${{ steps.set-matrix.outputs.matrix }}
+  #     matrix: ${{ steps.set-matrix.outputs.pod_json }}
   #   steps:
   #     - name: Get pods (mock)
   #       id: set-matrix
@@ -35,7 +35,7 @@ jobs:
       pod_json: ${{ steps.set-output.outputs.pod_json }}
 
     steps:
-       - name: 🧰 Checkout repo
+      - name: 🧰 Checkout repo
         uses: actions/checkout@v4
 
       - name: 🛠️ Run Ansible Playbook to Generate pod_output.json
@@ -55,7 +55,7 @@ jobs:
     needs: get-pods
     strategy:
       matrix:
-        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
+        include: ${{ fromJson(needs.get-pods.outputs.pod_json) }}
       fail-fast: false
     uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
