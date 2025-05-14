@@ -45,7 +45,7 @@ jobs:
 
       - name: File Formatting
         run: |
-          sed -i '' 's/ //g' /tmp/pods.json
+          sed -i 's/ //g' /tmp/pods.json
 
       - name: File Debug
         run: |
