@@ -52,22 +52,23 @@ jobs:
             echo "File /tmp/pods.json does not exist."
           fi
 
+      # - name: Set pod_json output
+      #   id: set-output
+      #   run: |
+      #     POD_JSON=$(cat /tmp/pods.json)
+      #     echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
+      #     rm -f /tmp/pods.json
+
       - name: Set pod_json output
         id: set-output
         run: |
           POD_JSON=$(cat /tmp/pods.json)
-          echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
-          rm -f /tmp/pods.json
-
-      - name: Debug the contents of POD_JSON
-        run: |
-          echo "Contents of $POD_JSON:"
-          cat $POD_JSON
+          echo "pod_json=$POD_JSON" >> $GITHUB_ENV
 
       - name: Debug the contents of GITHUB_OUTPUT
         run: |
-          echo "Contents of $GITHUB_OUTPUT:"
-          cat $GITHUB_OUTPUT
+          echo "Contents of GITHUB_OUTPUT:"
+          cat $GITHUB_ENV
 
 
   run-pods:
