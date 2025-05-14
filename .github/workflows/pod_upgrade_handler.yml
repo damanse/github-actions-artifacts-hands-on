@@ -27,11 +27,15 @@ jobs:
         host: ${{ fromJson(inputs.hosts) }}
     name: Pod ${{ inputs.pod }} - Host ${{ matrix.host }}
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       # - name: Check time window
       #   uses: ./.github/actions/time-window-check
       #   with:
       #     start_time: ${{ inputs.start_time }}
       #     end_time: ${{ inputs.end_time }}
+      
       - name: ⏰ Check Time Window for ${{ matrix.host }}
         run: |
           echo "Checking time window..."
