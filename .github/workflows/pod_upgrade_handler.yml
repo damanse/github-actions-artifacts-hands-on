@@ -82,17 +82,17 @@ jobs:
               print(f"🔁 Attempt {attempt} of {max_attempts} for host: {host}")
           
               try:
-                  # result = subprocess.run([
-                  #     "ansible-playbook",
-                  #     "upgrade-playbook.yml",
-                  #     "--extra-vars", f"target_host={host}"
-                  # ], check=True)
+                  result = subprocess.run([
+                      "ansible-playbook",
+                      "upgrade-playbook.yml",
+                      "--extra-vars", f"target_host={host}"
+                  ], check=True)
 
-                  # Simulate random failure (50% chance)
-                  if random.random() < 0.5:
-                    raise subprocess.CalledProcessError(returncode=1, cmd="simulated failure")
+                  # # Simulate random failure (50% chance)
+                  # if random.random() < 0.5:
+                  #   raise subprocess.CalledProcessError(returncode=1, cmd="simulated failure")
                   
-                  time.sleep(30)
+                  # time.sleep(30)
                   
                   print(f"✅ Upgrade succeeded on attempt {attempt}")
                   sys.exit(0)
