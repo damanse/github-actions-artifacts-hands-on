@@ -18,23 +18,43 @@ on:
         default: '18:30'
 
 jobs:
+  # get-pods:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     matrix: ${{ steps.set-matrix.outputs.matrix }}
+  #   steps:
+  #     - name: Get pods (mock)
+  #       id: set-matrix
+  #       run: |
+  #         # Replace this mock logic with your real pod/host generator
+  #         POD_JSON='[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
+  #         echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
+
   get-pods:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      pod_json: ${{ steps.set-output.outputs.pod_json }}
+
     steps:
-      - name: Get pods (mock)
-        id: set-matrix
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Ansible Playbook to Generate pods.json
         run: |
-          # Replace this mock logic with your real pod/host generator
-          POD_JSON='[{"pod":"251","hosts":["host1","host2","host3"]},{"pod":"288","hosts":["host100","host101","host102","host103","host104","host105"]}]'
-          echo "matrix=$POD_JSON" >> $GITHUB_OUTPUT
+          ansible-playbook playbooks/generate_pods.yml --extra-vars "site=${{ inputs.site }}"
+
+      - name: Set pod_json output
+        id: set-output
+        run: |
+          POD_JSON=$(cat /tmp/pods.json)
+          echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
+          rm -f /tmp/pods.json
 
   run-pods:
     needs: get-pods
     strategy:
       matrix:
-        include: ${{ fromJson(needs.get-pods.outputs.matrix) }}
+        pod_group: ${{ fromJson(needs.get-pods.outputs.pod_json) }}
       fail-fast: false
     uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
