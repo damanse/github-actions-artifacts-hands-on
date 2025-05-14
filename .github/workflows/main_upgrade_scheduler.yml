@@ -48,6 +48,10 @@ jobs:
           if [ -f /tmp/pods.json ]; then
             echo "File exists. Contents of /tmp/pods.json:"
             cat /tmp/pods.json
+            echo "Formatting...."
+            jq -c . /tmp/pods.json > /tmp/pods.min.json
+            echo "Contents of /tmp/pods.min.json:"
+            cat /tmp/pods.min.json
           else
             echo "File /tmp/pods.json does not exist."
           fi
@@ -62,7 +66,7 @@ jobs:
       - name: Set pod_json output
         id: set-output
         run: |
-          POD_JSON=$(cat /tmp/pods.json)
+          POD_JSON=$(cat /tmp/pods.min.json)
           echo "::set-output name=pod_json::$POD_JSON"
 
   debug-pod-json:
