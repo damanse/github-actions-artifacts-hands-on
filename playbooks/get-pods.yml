@@ -1,0 +1,21 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Set list of pods and hosts
+      set_fact:
+        pod_data: >
+          [
+            {
+              "pod": "251",
+              "hosts": ["host1", "host2", "host3"]
+            },
+            {
+              "pod": "288",
+              "hosts": ["host100", "host101", "host102", "host103", "host104", "host105"]
+            }
+          ]
+
+    - name: Write pod_data to pod_output.json
+      copy:
+        content: '{{ pod_data | to_json }}'
+        dest: pod_output.json
