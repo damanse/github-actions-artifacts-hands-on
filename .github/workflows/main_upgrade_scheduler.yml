@@ -63,7 +63,8 @@ jobs:
         id: set-output
         run: |
           POD_JSON=$(cat /tmp/pods.json)
-          echo "::set-output name=pod_json::$POD_JSON
+          echo "::set-output name=pod_json::$POD_JSON"
+
 
   run-pods:
     needs: get-pods
