@@ -84,7 +84,7 @@ jobs:
               try:
                   result = subprocess.run([
                       "ansible-playbook",
-                      "upgrade-playbook.yml",
+                      "./playbooks/upgrade-playbook.yml",
                       "--extra-vars", f"target_host={host}"
                   ], check=True)
 
