@@ -48,6 +48,7 @@ jobs:
         id: set-output
         run: |
           # POD_JSON=$(jq -c . /tmp/pod_output.json)
+          cat /tmp/pod_output.json | jq -c .
           POD_JSON=$(cat /tmp/pod_output.json | jq -c)
           echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
           echo $POD_JSON
