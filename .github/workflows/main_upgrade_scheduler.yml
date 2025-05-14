@@ -59,6 +59,17 @@ jobs:
           echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
           rm -f /tmp/pods.json
 
+      - name: Debug the contents of POD_JSON
+        run: |
+          echo "Contents of $POD_JSON:"
+          cat $POD_JSON
+
+      - name: Debug the contents of GITHUB_OUTPUT
+        run: |
+          echo "Contents of $GITHUB_OUTPUT:"
+          cat $GITHUB_OUTPUT
+
+
   run-pods:
     needs: get-pods
     strategy:
