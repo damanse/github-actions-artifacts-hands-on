@@ -1,6 +1,7 @@
-- name: Generate pod and host data YAML
+---
+- name: Generate pod JSON for upgrade
   hosts: localhost
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Define pod data
       set_fact:
@@ -19,33 +20,11 @@
               - "host104"
               - "host105"
 
-    - name: Write pod data to YAML file
+    - name: Write pod data to JSON file
       copy:
-        content: "{{ pod_data | to_yaml }}"
-        dest: /tmp/pod_output.yaml
+        content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
+        dest: /tmp/pods.json
 
-
-# - hosts: localhost
-#   gather_facts: false
-#   tasks:
-    # - name: Set list of pods and hosts
-    #   set_fact:
-    #     pod_data: >
-    #       [
-    #         {
-    #           "pod": "251",
-    #           "hosts": ["host1", "host2", "host3"]
-    #         },
-    #         {
-    #           "pod": "288",
-    #           "hosts": ["host100", "host101", "host102", "host103", "host104", "host105"]
-    #         }
-    #       ]
-
-    # - name: Write pod_data to pod_output.json
-    #   copy:
-    #     content: '{{ pod_data | to_json }}'
-    #     dest: /tmp/pod_output.json
-
-
-
+    - name: Debug the contents of pods.json
+      debug:
+        msg: "{{ lookup('file', '/tmp/pods.json') }}"
