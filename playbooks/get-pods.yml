@@ -22,7 +22,8 @@
 
     - name: Write pod data to JSON file
       copy:
-        content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
+        # content: "{{ pod_data | to_json | replace('\n', '') | replace(' ', '') }}"
+        content: "{{ pod_data | to_json }}"
         dest: /tmp/pods.json
 
     - name: Debug the contents of pods.json
