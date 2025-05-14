@@ -32,38 +32,32 @@ jobs:
   get-pods:
     runs-on: ubuntu-latest
     outputs:
-      pod_json: ${{ steps.set-output.outputs.pod_json }}
+      pod_yaml: ${{ steps.set-output.outputs.pod_yaml }}
 
     steps:
-      - name: 🧰 Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🛠️ Run Ansible Playbook to Generate pod_output.json
+      - name: Run Ansible Playbook to Generate pod_output.yaml
         run: |
-          echo "Running Ansible playbook with site=${{ inputs.site }}"
-          ansible-playbook playbooks/get-pods.yml \
-            --extra-vars "site=${{ inputs.site }}"
-      
-      - name: 📦 Set pod_json output and clean up
+          ansible-playbook playbooks/get-pods.yml --extra-vars "site=${{ inputs.site }}"
+
+      - name: Set pod_yaml output and clean up
         id: set-output
         run: |
-          # POD_JSON=$(jq -c . /tmp/pod_output.json)
-          cat /tmp/pod_output.json | jq -c .
-          POD_JSON=$(cat /tmp/pod_output.json | jq -c)
-          echo "pod_json=$POD_JSON" >> "$GITHUB_OUTPUT"
-          echo $POD_JSON
-          echo $GITHUB_OUTPUT
-          rm -f /tmp/pod_output.json
+          POD_YAML=$(cat /tmp/pod_output.yaml)
+          echo "pod_yaml=$POD_YAML" >> "$GITHUB_OUTPUT"
+          rm -f /tmp/pod_output.yaml
 
   run-pods:
     needs: get-pods
     strategy:
       matrix:
-        pod_group: ${{ fromJson(needs.get-pods.outputs.pod_json) }}
+        pod_group: ${{ fromYaml(needs.get-pods.outputs.pod_yaml) }}
       fail-fast: false
     uses: ./.github/workflows/pod_upgrade_handler.yml
     with:
-      pod: ${{ matrix.pod }}
-      hosts: ${{ toJson(matrix.hosts) }}
+      pod: ${{ matrix.pod_group.pod }}
+      hosts: ${{ toJson(matrix.pod_group.hosts) }}
       start_time: ${{ inputs.start_time }}
       end_time: ${{ inputs.end_time }}
