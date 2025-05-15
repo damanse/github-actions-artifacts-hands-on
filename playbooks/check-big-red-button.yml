@@ -1,0 +1,6 @@
+- name: Check Big Red Button
+  hosts: localhost
+  tasks:
+    - name: API Call to Aria Operations to check Big Red Button
+      ansible.builtin.debug:
+        msg: "Checking Big Red Button for {{ target_host }}..."

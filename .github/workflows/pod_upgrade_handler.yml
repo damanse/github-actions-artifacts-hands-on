@@ -59,7 +59,28 @@ jobs:
               sys.exit(1) 
           EOF
      
-
+      - name: Check Big Red Button on ${{ matrix.host }}
+        id: check-big-red-button
+        run: |
+          echo "Checking Big Red Button for ${{ matrix.host }}..."
+          
+          python3 <<EOF
+          import subprocess
+          import sys
+          
+          host = "${{ matrix.host }}"
+          
+          try:
+              result = subprocess.run([
+                  "ansible-playbook",
+                  "playbooks/check-big-red-button.yml",
+                  "--extra-vars", f"target_host={host}"
+              ], check=True)
+              print("Big Red Button check passed.")
+          except subprocess.CalledProcessError as e:
+              print(f"Big Red Button check has been executed, stopping this run! Details: {e.returncode}")
+              sys.exit(1)
+          EOF
 
       - name: Run Upgrade on ${{ matrix.host }}
         id: upgrade
