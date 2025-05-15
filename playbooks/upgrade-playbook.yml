@@ -3,6 +3,8 @@
 - name: Upgrade host
   hosts: localhost
   gather_facts: false
+  vars:
+    random_command: "bash -c 'echo $(( ( RANDOM % 3 ) + 1 ))'"
   tasks:
     - name: Simulate upgrade
       ansible.builtin.debug:
@@ -17,20 +19,19 @@
         # minutes: "{{ pause_minutes }}"
         seconds: "{{ pause_minutes }}"
 
-    - name: Generate random number between 1 and 3
-      ansible.builtin.shell: echo $(( ( RANDOM % 3 ) + 1 ))
+    - name: Generate random number between 1 and 3 using bash
+      shell: "{{ random_command }}"
       register: random_result
 
     - name: Show the generated number
-      ansible.builtin.debug:
+      debug:
         msg: "Generated number: {{ random_result.stdout }}"
 
     - name: Simulate failure if number is 1
-      ansible.builtin.fail:
-        msg: "Host Upgrade has failed!"
+      fail:
+        msg: "Simulated failure occurred! Random number was {{ random_result.stdout }}"
       when: random_result.stdout == "1"
 
-    - name: Simulate success
-      ansible.builtin.debug:
-        msg: "Host Upgrade has succeeded!"
-      when: random_result.stdout != 1
+    - name: Continue if no failure
+      debug:
+        msg: "No failure occurred. Playbook continues."
