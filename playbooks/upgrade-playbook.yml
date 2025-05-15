@@ -20,18 +20,18 @@
         seconds: "{{ pause_minutes }}"
 
     - name: Generate random number between 1 and 3 using bash
-      shell: "{{ random_command }}"
+      ansible.builtin.shell: "{{ random_command }}"
       register: random_result
 
     - name: Show the generated number
-      debug:
+      ansible.builtin.debug:
         msg: "Generated number: {{ random_result.stdout }}"
 
     - name: Simulate failure if number is 1
-      fail:
-        msg: "Simulated failure occurred! Random number was {{ random_result.stdout }}"
+      ansible.builtin.fail:
+        msg: "Host Upgrade Failed!"
       when: random_result.stdout == "1"
 
     - name: Continue if no failure
-      debug:
-        msg: "No failure occurred. Playbook continues."
+      ansible.builtin.debug:
+        msg: "Host Upgrade was Successful!"
