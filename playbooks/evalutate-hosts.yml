@@ -14,14 +14,14 @@
       ansible.builtin.set_fact:
         filtered_pods: []
 
-    - name: Loop through pods and filter hosts (remove hosts with '100' - this will be based on vcenter tags!)
+    - name: Loop through pods and filter hosts (remove hosts with '103' - this will be based on vcenter tags!)
       ansible.builtin.set_fact:
         filtered_pods: "{{ filtered_pods + [filtered_pod] }}"
       vars:
         filtered_pod: >-
           {{
             pod | combine({
-              'hosts': pod.hosts | select('search', '^(?!.*100).*') | list
+              'hosts': pod.hosts | select('search', '^(?!.*03$).*') | list
             })
           }}
       loop: "{{ pods_data }}"
