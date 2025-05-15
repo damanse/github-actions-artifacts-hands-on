@@ -1,0 +1,35 @@
+- name: Upgrade Evaluator
+  hosts: localhost
+  tasks:
+    - name: Read pods JSON
+      ansible.builtin.slurp:
+        src: "{{ pods_json_file }}"
+      register: pods_json
+
+    - name: Parse JSON
+      ansible.builtin.set_fact:
+        pods_data: "{{ pods_json.content | b64decode | from_json }}"
+
+    - name: Initialize filtered pods list
+      ansible.builtin.set_fact:
+        filtered_pods: []
+
+    - name: Loop through pods and filter hosts (remove hosts with '100' - this will be based on vcenter tags!)
+      ansible.builtin.set_fact:
+        filtered_pods: "{{ filtered_pods + [filtered_pod] }}"
+      vars:
+        filtered_pod: >-
+          {{
+            pod | combine({
+              'hosts': pod.hosts | select('search', '^(?!.*100).*') | list
+            })
+          }}
+      loop: "{{ pods_data }}"
+      loop_control:
+        loop_var: pod
+
+    - name: Write filtered JSON to file
+      ansible.builtin.copy:
+        content: "{{ filtered_pods | to_json }}"
+        dest: "{{ pods_json_file }}"
+        mode: '0644'
