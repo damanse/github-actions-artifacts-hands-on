@@ -36,7 +36,7 @@ jobs:
       #     start_time: ${{ inputs.start_time }}
       #     end_time: ${{ inputs.end_time }}
       
-      - name: ⏰ Check Time Window for ${{ matrix.host }}
+      - name: Check Time Window for ${{ matrix.host }}
         run: |
           echo "Checking time window..."
   
@@ -55,7 +55,7 @@ jobs:
           print(f"Start: {start}, End: {end}, Now: {now}")
           
           if not (start <= now <= end):
-              print("⛔ Outside time window. Ending Upgrades.")
+              print("Outside time window. Ending Upgrades.")
               sys.exit(1) 
           EOF
      
@@ -83,7 +83,7 @@ jobs:
           sleep_seconds = 5
           
           for attempt in range(1, max_attempts + 1):
-              print(f"🔁 Attempt {attempt} of {max_attempts} for host: {host}")
+              print(f"Attempt {attempt} of {max_attempts} for host: {host}")
           
               try:
                   result = subprocess.run([
@@ -92,15 +92,15 @@ jobs:
                       "--extra-vars", f"target_host={host}"
                   ], check=True)
                   
-                  print(f"✅ Upgrade succeeded on attempt {attempt}")
+                  print(f"Upgrade succeeded on attempt {attempt}")
                   sys.exit(0)
           
               except subprocess.CalledProcessError as e:
-                  print(f"❌ Playbook failed on attempt {attempt} with code {e.returncode}")
+                  print(f"Playbook failed on attempt {attempt} with code {e.returncode}")
                   if attempt < max_attempts:
                       print(f"⏳ Retrying in {sleep_seconds} seconds...")
                       time.sleep(sleep_seconds)
                   else:
-                      print("🔥 Upgrade failed after all retries.")
+                      print("Upgrade failed after all retries.")
                       sys.exit(1)
           EOF
