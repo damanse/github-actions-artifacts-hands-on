@@ -38,7 +38,7 @@ jobs:
 
       - name: Evaulate Hosts (Workfload Evaluator...)
         run: |
-          ansible-playbook playbooks/evalutate-hosts.yml --extra-vars "input_file=/tmp/pods.json output_file=/tmp/filtered_pods.json"
+          ansible-playbook playbooks/evalutate-hosts.yml --extra-vars "pods_json_file=/tmp/pods.json"
       
       - name: File Formatting
         run: |
