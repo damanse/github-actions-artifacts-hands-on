@@ -69,16 +69,29 @@ jobs:
 
   run-upgrades:
     needs: get-pods-for-upgrade
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include: ${{ fromJson(needs.get-pods-for-upgrade.outputs.matrix) }}
       fail-fast: false
-    uses: ./.github/workflows/pod_upgrade_handler.yml
-    with:
-      pod: ${{ matrix.pod }}
-      hosts: ${{ toJson(matrix.hosts) }}
-      start_time: ${{ inputs.start_time }}
-      end_time: ${{ inputs.end_time }}
+
+    steps:
+      - name: Trigger pod_upgrade_handler workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "pod_upgrade_handler.yml",
+              ref: "main", # Replace with the branch where the reusable workflow resides
+              inputs: {
+                pod: "${{ matrix.pod }}",
+                hosts: JSON.stringify(${{ matrix.hosts }}),
+                start_time: "${{ inputs.start_time }}",
+                end_time: "${{ inputs.end_time }}"
+              }
+            });
 
   cleanup:
     runs-on: ubuntu-latest

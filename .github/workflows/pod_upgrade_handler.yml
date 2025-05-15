@@ -15,7 +15,25 @@ on:
       end_time:
         required: true
         type: string
-
+  workflow_dispatch:
+    inputs:
+      pod:
+        description: 'Pod to upgrade'
+        required: true
+        type: string
+      hosts:
+        description: 'Hosts for the pod'
+        required: true
+        type: string
+      start_time:
+        description: 'Start time for upgrade'
+        required: true
+        type: string
+      end_time:
+        description: 'End time for upgrade'
+        required: true
+        type: string
+        
 jobs:
   upgrade-hosts:
     runs-on: ubuntu-latest
