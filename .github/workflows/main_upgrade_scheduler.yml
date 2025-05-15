@@ -4,10 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       site:
-        description: 'Site to process'
+        description: 'Site/POD Group to process'
         required: true
         type: string
-        default: 'PG_256'
+        default: 'pg_256'
+      site_group:
+        description: 'Site Group to process'
+        required: true
+        type: string
+        default: 'BLUE'
       start_time:
         description: 'Start of allowed time window (UTC HH:MM)'
         required: true
@@ -29,7 +34,7 @@ jobs:
 
       - name: Run Ansible Playbook to Get Pods
         run: |
-          ansible-playbook playbooks/get-pods-for-upgrade.yml --extra-vars "site=${{ inputs.site }}"
+          ansible-playbook playbooks/get-pods-for-upgrade.yml --extra-vars "site=${{ inputs.site }} site_group=${{ inputs.site_group }}"
 
       - name: File Formatting
         run: |

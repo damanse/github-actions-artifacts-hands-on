@@ -20,9 +20,12 @@
               - "host104"
               - "host105"
 
+    - name: Get PODS and Hosts for Upgrade
+      ansible.builtin.debug:
+        msg: "Returning list of pods and hosts for upgrade for {{ site }} and {{ site_group }}"
+
     - name: Write JSON string to /tmp/pods.json File
       ansible.builtin.copy:
         content: "{{ pods_data | to_json }}"
         dest: /tmp/pods.json
         mode: '0644'
-
