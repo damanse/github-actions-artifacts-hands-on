@@ -1,9 +1,14 @@
 name: Main Upgrade Scheduler
-run-name: Main Upgrade Scheduler - ${{ inputs.site }} - ${{ site_group }}
+run-name: ${{ inputs.runname }}
 
 on:
   workflow_dispatch:
     inputs:
+      runname: 
+        description: 'Run name for the workflow'
+        required: true
+        type: string
+        default: 'Main Upgrade Scheduler'
       site:
         description: 'Site/POD Group to process'
         required: true
@@ -89,6 +94,7 @@ jobs:
             const workflow_id = "pod_upgrade_handler.yml";
             const ref = "working-independant-workflows"; // Replace with the branch where the workflow resides
             const inputs = {
+              runname: "POD Upgrade - ${{ matrix.pod }}",
               pod: "${{ matrix.pod }}",
               hosts: JSON.stringify(${{
                 toJson(matrix.hosts)
