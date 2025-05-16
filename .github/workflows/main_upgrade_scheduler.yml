@@ -89,10 +89,13 @@ jobs:
             const ref = "working-independant-workflows"; // Replace with the branch where the workflow resides
             const inputs = {
               pod: "${{ matrix.pod }}",
-              hosts: "${{ toJson(matrix.hosts) }}",
+              hosts: '${{ toJson(matrix.hosts) }}', // Wrap in single quotes to ensure proper escaping
               start_time: "${{ inputs.start_time }}",
               end_time: "${{ inputs.end_time }}"
             };
+
+            console.log("Inputs being sent to pod_upgrade_handler:");
+            console.log(inputs);
 
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
@@ -102,16 +105,17 @@ jobs:
               inputs
             });
 
-  cleanup:
-    runs-on: ubuntu-latest
-    needs: [get-pods-for-upgrade, run-upgrades]
-    if: always()
-    steps:
-      - name: Cleanup pods.json file
-        run: |
-          if [ -f /tmp/pods.json ]; then
-            rm /tmp/pods.json
-            echo "/tmp/pods.json has been deleted."
-          else
-            echo "/tmp/pods.json does not exist. Nothing to delete."
-          fi
+    cleanup:
+      runs-on: ubuntu-latest
+      needs: [get-pods-for-upgrade, run-upgrades]
+      if: always()
+      steps:
+        - name: Cleanup pods.json file
+          run: |
+            if [ -f /tmp/pods.json ]; then
+              rm /tmp/pods.json
+              echo "/tmp/pods.json has been deleted."
+            else
+              echo "/tmp/pods.json does not exist. Nothing to delete."
+            fi
+
