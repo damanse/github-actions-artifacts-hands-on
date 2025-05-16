@@ -84,7 +84,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: "pod_upgrade_handler.yml",
-              ref: "main", # Replace with the branch where the reusable workflow resides
+              ref: "working-independant-workflows", 
               inputs: {
                 pod: "${{ matrix.pod }}",
                 hosts: JSON.stringify(${{ matrix.hosts }}),

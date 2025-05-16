@@ -1,5 +1,9 @@
 name: Upgrade POD
 
+permissions:
+  actions: write
+  contents: read
+
 on:
   workflow_call:
     inputs:
@@ -15,6 +19,7 @@ on:
       end_time:
         required: true
         type: string
+
   workflow_dispatch:
     inputs:
       pod:
