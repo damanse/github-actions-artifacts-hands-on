@@ -16,6 +16,10 @@
       ansible.builtin.set_fact:
         pause_minutes: "{{ 1 + (min_minutes - max_minutes) | abs | random }}"
 
+    - name: Show pause time
+      ansible.builtin.debug:
+        msg: "Pause time is {{ pause_minutes }} minutes"
+
     - name: Pause completing the upgrade
       ansible.builtin.pause:
         minutes: "{{ pause_minutes }}"
