@@ -89,7 +89,9 @@ jobs:
             const ref = "working-independant-workflows"; // Replace with the branch where the workflow resides
             const inputs = {
               pod: "${{ matrix.pod }}",
-              hosts: '${{ toJson(matrix.hosts) }}', // Wrap in single quotes to ensure proper escaping
+              hosts: JSON.stringify(${{
+                toJson(matrix.hosts)
+              }}), // Properly stringify the hosts array
               start_time: "${{ inputs.start_time }}",
               end_time: "${{ inputs.end_time }}"
             };
