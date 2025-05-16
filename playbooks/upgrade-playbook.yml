@@ -5,8 +5,8 @@
   gather_facts: false
   vars:
     random_command: "bash -c 'echo $(( ( RANDOM % 3 ) + 1 ))'"
-    min_minutes: 10
-    max_minutes: 20
+    min_minutes: 60
+    max_minutes: 90
   tasks:
     - name: Simulate upgrade
       ansible.builtin.debug:
