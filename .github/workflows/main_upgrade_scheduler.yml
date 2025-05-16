@@ -76,6 +76,11 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Debug matrix hosts
+        run: |
+          echo "Matrix hosts: ${{ toJson(matrix.hosts) }}"
+          echo "Stringified hosts: $(echo '${{ toJson(matrix.hosts) }}' | jq -c .)"
+
       - name: Trigger pod_upgrade_handler workflow
         uses: actions/github-script@v6
         with:
