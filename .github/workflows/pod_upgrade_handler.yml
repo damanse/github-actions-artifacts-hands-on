@@ -40,6 +40,14 @@ on:
         type: string
         
 jobs:
+  debug-hosts: 
+    runs-on: ubuntu-latest
+    name: Debug matrix hosts
+    steps:
+      - name: Debug Hosts
+        run: |
+          echo "Hosts: ${{ inputs.hosts }}"
+
   upgrade-hosts:
     runs-on: ubuntu-latest
     timeout-minutes: 720
@@ -53,12 +61,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # - name: Check time window
-      #   uses: ./.github/actions/time-window-check
-      #   with:
-      #     start_time: ${{ inputs.start_time }}
-      #     end_time: ${{ inputs.end_time }}
-      
       - name: Check Time Window for ${{ matrix.host }}
         run: |
           echo "Checking time window..."
