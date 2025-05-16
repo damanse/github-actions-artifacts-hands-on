@@ -80,17 +80,21 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            await github.actions.createWorkflowDispatch({
+            const workflow_id = "pod_upgrade_handler.yml";
+            const ref = "working-independant-workflows"; // Replace with the branch where the workflow resides
+            const inputs = {
+              pod: "${{ matrix.pod }}",
+              hosts: JSON.stringify(${{ matrix.hosts }}),
+              start_time: "${{ inputs.start_time }}",
+              end_time: "${{ inputs.end_time }}"
+            };
+
+            await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "pod_upgrade_handler.yml",
-              ref: "working-independant-workflows", 
-              inputs: {
-                pod: "${{ matrix.pod }}",
-                hosts: JSON.stringify(${{ matrix.hosts }}),
-                start_time: "${{ inputs.start_time }}",
-                end_time: "${{ inputs.end_time }}"
-              }
+              workflow_id,
+              ref,
+              inputs
             });
 
   cleanup:
