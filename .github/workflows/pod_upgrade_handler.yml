@@ -1,4 +1,5 @@
-name: Upgrade POD - ${{ inputs.pod }} - ${{ github.run_id }}
+name: Upgrade POD
+run-name: Upgrade POD - ${{ inputs.pod }} - ${{ github.run_id }}
 
 permissions:
   actions: write
