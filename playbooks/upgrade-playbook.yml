@@ -5,7 +5,7 @@
   gather_facts: false
   vars:
     random_command: "bash -c 'echo $(( ( RANDOM % 3 ) + 1 ))'"
-    min_minutes: 10 
+    min_minutes: 10
     max_minutes: 20
   tasks:
     - name: Simulate upgrade
