@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Wait until start time
         run: |
-          python3 -c <<EOF
+          python3 -u <<EOF
           from datetime import datetime, timedelta
           import sys
           import time
