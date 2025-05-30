@@ -69,7 +69,7 @@ jobs:
           
           print(f"Waiting for {wait_minutes} minutes until {start_time}")
           time.sleep(wait_seconds)
-          print("Start time reached, proceeding with upgrades.")
+          print("Start time set to {start_time} and current time is {now_time}, proceeding with upgrades.")
           EOF
 
   get-pods-for-upgrade:
