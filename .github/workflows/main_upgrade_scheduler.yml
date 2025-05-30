@@ -58,10 +58,10 @@ jobs:
           start_datetime = datetime.combine(today, start_time).replace(tzinfo=cet)
           
           if now_time >= start_time:
-              print(f"Start time set to {start_datetime.strftime('%Y-%m-%d %H:%M %Z')} and current time is {now.strftime('%Y-%m-%d %H:%M %Z')}, proceeding with upgrades.")
+              print(f"Start time set to {start_datetime.strftime('%Y-%m-%d %H:%M %Z')} and current time is {now.strftime('%Y-%m-%d %H:%M %Z')}, proceeding with upgrades.", flush=True)
               sys.exit(0)
               
-          print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before start time {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}, waiting...")
+          print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before start time {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}, waiting...", flush=True)
           
           # Calculate wait time until start time today
           today_start = datetime.combine(now.date(), start_time)
