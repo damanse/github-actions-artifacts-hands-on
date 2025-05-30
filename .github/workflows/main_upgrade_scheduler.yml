@@ -32,6 +32,7 @@ jobs:
   wait-for-window:
     name: Wait for Start Time Window
     runs-on: ubuntu-latest
+    timeout-minutes: 1440  # 24 hours to handle any possible wait duration
     steps:
       - name: Wait until start time
         run: |
@@ -57,9 +58,7 @@ jobs:
               print(f"Start time set to {start_time.strftime('%H:%M')} and current time is {now_time.strftime('%H:%M')}, proceeding with upgrades.")
               sys.exit(0)
               
-          print(f"Current time {now_time.strftime('%H:%M')} is before start time {start_time.strftime('%H:%M')}, waiting...")
-          
-          print(f"Current time (CET): {now.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before start time {start_time.strftime('%Y-%m-%d %H:%M %Z')}, waiting...")
           
           # Calculate wait time until start time today
           today_start = datetime.combine(now.date(), start_time)
