@@ -4,7 +4,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    random_command: "bash -c 'echo $(( ( RANDOM % 3 ) + 1 ))'"
+    random_command: "bash -c 'echo $(( ( RANDOM % 10 ) + 1 ))'"
     min_minutes: 5 
     max_minutes: 30
   tasks:
