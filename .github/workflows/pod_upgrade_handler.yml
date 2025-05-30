@@ -40,11 +40,11 @@ on:
         required: true
         type: string
       start_time:
-        description: 'Start time for upgrade'
+        description: 'Start of allowed time window (Stockholm/CET HH:MM)'
         required: true
         type: string
       end_time:
-        description: 'End time for upgrade'
+        description: 'End of allowed time window (Stockholm/CET HH:MM)'
         required: true
         type: string
         
@@ -82,20 +82,25 @@ jobs:
           start_time_str = "${{ inputs.start_time }}"
           end_time_str = "${{ inputs.end_time }}"
           
-          # Convert to CET timezone
+          # Convert to Stockholm timezone
           cet = ZoneInfo('Europe/Stockholm')
-          now = datetime.now(cet).time()
+          now = datetime.now(cet)
+          
+          # Get the time window for today
           start = datetime.strptime(start_time_str, "%H:%M").time()
           end = datetime.strptime(end_time_str, "%H:%M").time()
           
           print(f"Host: ${{ matrix.host }}")
-          print(f"Start: {start}, End: {end}, Now (CET): {now}")
+          print(f"Start: {start}, End: {end}")
+          print(f"Current time (CET): {now.strftime('%Y-%m-%d %H:%M %Z')}")
           
-          if not (start <= now <= end):
-              print(f"Current time {now} is outside allowed window ({start} - {end})")
-              print("Outside time window. Ending Upgrades.")
+          # Simple time comparison with now.time()
+          if not (start <= now.time() <= end):
+              print("Current time is outside allowed window")
+              print("Ending upgrades for this host.")
               sys.exit(1)
-          print("Within time window, proceeding with upgrade.")
+          
+          print("Within allowed window, proceeding with upgrade.")
           EOF
      
       - name: Check Big Red Button on ${{ matrix.host }}
