@@ -55,7 +55,7 @@ jobs:
           # Compare just the time portions
           now_time = now.time()
           if now_time >= start_time:
-              print(f"Start time set to {start_time.strftime('%H:%M')} and current time is {now_time.strftime('%H:%M')}, proceeding with upgrades.")
+              print(f"Start time set to {start_time.strftime('%Y-%m-%d %H:%M %Z')} and current time is {now.strftime('%Y-%m-%d %H:%M %Z')}, proceeding with upgrades.")
               sys.exit(0)
               
           print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before start time {start_time.strftime('%Y-%m-%d %H:%M %Z')}, waiting...")
