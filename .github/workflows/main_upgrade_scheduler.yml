@@ -35,6 +35,46 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
+      - name: Wait for start time
+        run: |
+          python3 -c '
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          import time
+          import os
+          from datetime import timezone
+          
+          # Get the local timezone
+          local_tz = datetime.now().astimezone().tzinfo
+          
+          # Get current time in local timezone
+          current_time = datetime.now(local_tz)
+          
+          # Parse start time (which is in UTC) and convert to local
+          start_time_str = "${{ inputs.start_time }}"
+          start_hours, start_minutes = map(int, start_time_str.split(":"))
+          
+          # Create UTC datetime for start time today
+          utc_start = datetime.now(timezone.utc).replace(
+              hour=start_hours, 
+              minute=start_minutes, 
+              second=0, 
+              microsecond=0
+          )
+          
+          # Convert UTC start time to local time
+          start_time = utc_start.astimezone(local_tz)
+          
+          if current_time < start_time:
+              wait_seconds = (start_time - current_time).total_seconds()
+              print(f"Current time (Local): {current_time.strftime("%H:%M %Z")}")
+              print(f"Target start time: {start_time.strftime("%H:%M %Z")} (converted from {start_time_str} UTC)")
+              print(f"Waiting for {int(wait_seconds/60)} minutes...")
+              time.sleep(wait_seconds)
+          else:
+              print(f"Current time ({current_time.strftime("%H:%M %Z")}) is after start time ({start_time.strftime("%H:%M %Z")}, converted from {start_time_str} UTC), proceeding immediately")
+          '
+
       - name: Checkout code
         uses: actions/checkout@v4
 
