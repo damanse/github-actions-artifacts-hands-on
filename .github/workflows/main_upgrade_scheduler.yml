@@ -54,7 +54,7 @@ jobs:
           # Compare just the time portions
           now_time = now.time()
           if now_time >= start_time:
-              print("Start time set to {start_time} and current time is {now_time}, proceeding with upgrades.")
+              print(f"Start time set to {start_time} and current time is {now_time}, proceeding with upgrades.")
               sys.exit(0)
               
           print(f"Current time {now_time} is before start time {start_time}, waiting...")
@@ -69,7 +69,7 @@ jobs:
           
           print(f"Waiting for {wait_minutes} minutes until {start_time}")
           time.sleep(wait_seconds)
-          print("Wait time is now reached, current time is {now_time}, proceeding with upgrades.")
+          print(f"Wait time is now reached, current time is {now_time}, proceeding with upgrades.")
           EOF
 
   get-pods-for-upgrade:
