@@ -48,24 +48,28 @@ jobs:
           cet = ZoneInfo('Europe/Stockholm')
           now = datetime.now(cet)
           
-          # Create start time for today
-          today_start = datetime.combine(now.date(), datetime.strptime(start_time_str, "%H:%M").time()).astimezone(cet)
-          tomorrow_start = today_start + timedelta(days=1)
+          # Parse the time components
+          start_time = datetime.strptime(start_time_str, "%H:%M").time()
           
-          # Pick the next start time (either today or tomorrow)
-          next_start = today_start if now < today_start else tomorrow_start
+          # Compare just the time portions
+          now_time = now.time()
+          if now_time >= start_time:
+              print("Current time is after today's start time, proceeding with upgrades.")
+              sys.exit(0)
+              
+          print(f"Current time {now_time} is before start time {start_time}, waiting...")
           
           print(f"Current time (CET): {now.strftime('%Y-%m-%d %H:%M %Z')}")
-          print(f"Next start time: {next_start.strftime('%Y-%m-%d %H:%M %Z')}")
           
-          if now < next_start:
-              wait_seconds = (next_start - now).total_seconds()
-              wait_minutes = int(wait_seconds / 60)
-              print(f"Waiting for {wait_minutes} minutes until start time")
-              time.sleep(wait_seconds)
-              print("Start time reached, proceeding with upgrades.")
-          else:
-              print("Already past start time, proceeding with upgrades.")
+          # Calculate wait time until start time today
+          today_start = datetime.combine(now.date(), start_time)
+          today_start = today_start.replace(tzinfo=cet)
+          wait_seconds = (today_start - now).total_seconds()
+          wait_minutes = int(wait_seconds / 60)
+          
+          print(f"Waiting for {wait_minutes} minutes until {start_time}")
+          time.sleep(wait_seconds)
+          print("Start time reached, proceeding with upgrades.")
           EOF
 
   get-pods-for-upgrade:
