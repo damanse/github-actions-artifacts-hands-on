@@ -87,20 +87,26 @@ jobs:
           now = datetime.now(cet)
           
           # Get the time window for today
-          start = datetime.strptime(start_time_str, "%H:%M").time()
-          end = datetime.strptime(end_time_str, "%H:%M").time()
+          start_time = datetime.strptime(start_time_str, "%H:%M").time()
+          end_time = datetime.strptime(end_time_str, "%H:%M").time()
+          
+          # Create full datetime objects for today's window
+          today = now.date()
+          start_dt = datetime.combine(today, start_time).replace(tzinfo=cet)
+          end_dt = datetime.combine(today, end_time).replace(tzinfo=cet)
           
           print(f"Host: ${{ matrix.host }}")
-          print(f"Start: {start}, End: {end}")
-          print(f"Current time (CET): {now.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"Start time: {start_dt.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"End time: {end_dt.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"Current time: {now.strftime('%Y-%m-%d %H:%M %Z')}")
           
-          # Simple time comparison with now.time()
-          if not (start <= now.time() <= end):
-              print("Current time is outside allowed window")
+          # Time window comparison
+          if not (start_time <= now.time() <= end_time):
+              print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is outside allowed window")
               print("Ending upgrades for this host.")
               sys.exit(1)
           
-          print("Within allowed window, proceeding with upgrade.")
+          print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is within allowed window, proceeding with upgrade.")
           EOF
      
       - name: Check Big Red Button on ${{ matrix.host }}
@@ -133,7 +139,7 @@ jobs:
           ANSIBLE_FORCE_COLOR: '1'
         run: |
           echo "Running upgrade script on ${{ matrix.host }}"
-          echo "Checking Start and End time ${{ inputs.start_time }} - ${{ inputs.end_time }}"
+          echo "Checking time window (${{ inputs.start_time }} - ${{ inputs.end_time }})"
           echo "Checking Big Red Button..."
           echo "Starting upgrade..."
 
