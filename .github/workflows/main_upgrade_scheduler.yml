@@ -52,21 +52,20 @@ jobs:
           # Parse the time components
           start_time = datetime.strptime(start_time_str, "%H:%M").time()
           
-          # Compare just the time portions
+          # Compare times and handle next day case
           now_time = now.time()
           today = now.date()
           start_datetime = datetime.combine(today, start_time).replace(tzinfo=cet)
           
+          # If current time is past start time, we need to wait for tomorrow
           if now_time >= start_time:
-              print(f"Start time set to {start_datetime.strftime('%Y-%m-%d %H:%M %Z')} and current time is {now.strftime('%Y-%m-%d %H:%M %Z')}, proceeding with upgrades.", flush=True)
-              sys.exit(0)
-              
-          print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before start time {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}, waiting...", flush=True)
+              start_datetime = start_datetime + timedelta(days=1)
+              print(f"Current time is past today's start window, will wait until tomorrow {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}", flush=True)
+          else:
+              print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before today's start time {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}, waiting...", flush=True)
           
-          # Calculate wait time until start time today
-          today_start = datetime.combine(now.date(), start_time)
-          today_start = today_start.replace(tzinfo=cet)
-          wait_seconds = (today_start - now).total_seconds()
+          # Calculate wait time until next start time (today or tomorrow)
+          wait_seconds = (start_datetime - now).total_seconds()
           wait_minutes = int(wait_seconds / 60)
           
           print(f"Waiting for {wait_minutes} minutes until {start_datetime.strftime('%Y-%m-%d %H:%M CEST')}")
