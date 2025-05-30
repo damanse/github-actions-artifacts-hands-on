@@ -77,20 +77,25 @@ jobs:
           python3 <<EOF
           from datetime import datetime
           import sys
+          from zoneinfo import ZoneInfo
           
           start_time_str = "${{ inputs.start_time }}"
           end_time_str = "${{ inputs.end_time }}"
           
+          # Convert to CET timezone
+          cet = ZoneInfo('Europe/Stockholm')
+          now = datetime.now(cet).time()
           start = datetime.strptime(start_time_str, "%H:%M").time()
           end = datetime.strptime(end_time_str, "%H:%M").time()
-          now = datetime.utcnow().time()  # Or use CET if needed
           
           print(f"Host: ${{ matrix.host }}")
-          print(f"Start: {start}, End: {end}, Now: {now}")
+          print(f"Start: {start}, End: {end}, Now (CET): {now}")
           
           if not (start <= now <= end):
+              print(f"Current time {now} is outside allowed window ({start} - {end})")
               print("Outside time window. Ending Upgrades.")
-              sys.exit(1) 
+              sys.exit(1)
+          print("Within time window, proceeding with upgrade.")
           EOF
      
       - name: Check Big Red Button on ${{ matrix.host }}

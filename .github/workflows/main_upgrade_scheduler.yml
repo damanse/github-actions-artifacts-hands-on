@@ -29,52 +29,52 @@ on:
         default: '18:30'
 
 jobs:
+  wait-for-window:
+    name: Wait for Start Time Window
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait until start time
+        run: |
+          python3 <<EOF
+          from datetime import datetime, timedelta
+          import sys
+          import time
+          from zoneinfo import ZoneInfo
+
+          start_time_str = "${{ inputs.start_time }}"
+          end_time_str = "${{ inputs.end_time }}"
+          
+          # Convert to CET timezone
+          cet = ZoneInfo('Europe/Stockholm')
+          now = datetime.now(cet)
+          
+          # Get today's and tomorrow's start times
+          today_start = datetime.combine(now.date(), datetime.strptime(start_time_str, "%H:%M").time())
+          tomorrow_start = today_start + timedelta(days=1)
+          
+          # Pick the next start time (either today or tomorrow)
+          next_start = today_start if now < today_start else tomorrow_start
+          
+          print(f"Current time (CET): {now.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"Next start time: {next_start.strftime('%Y-%m-%d %H:%M %Z')}")
+          
+          if now < next_start:
+              wait_seconds = (next_start - now).total_seconds()
+              wait_minutes = int(wait_seconds / 60)
+              print(f"Waiting for {wait_minutes} minutes until start time")
+              time.sleep(wait_seconds)
+              print("Start time reached, proceeding with upgrades.")
+          else:
+              print("Already past start time, proceeding with upgrades.")
+          EOF
+
   get-pods-for-upgrade:
+    needs: wait-for-window
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
-      - name: Wait for start time
-        run: |
-          python3 -c '
-          from datetime import datetime
-          from zoneinfo import ZoneInfo
-          import time
-          import os
-          from datetime import timezone
-          
-          # Get the local timezone
-          local_tz = datetime.now().astimezone().tzinfo
-          
-          # Get current time in local timezone
-          current_time = datetime.now(local_tz)
-          
-          # Parse start time (which is in UTC) and convert to local
-          start_time_str = "${{ inputs.start_time }}"
-          start_hours, start_minutes = map(int, start_time_str.split(":"))
-          
-          # Create UTC datetime for start time today
-          utc_start = datetime.now(timezone.utc).replace(
-              hour=start_hours, 
-              minute=start_minutes, 
-              second=0, 
-              microsecond=0
-          )
-          
-          # Convert UTC start time to local time
-          start_time = utc_start.astimezone(local_tz)
-          
-          if current_time < start_time:
-              wait_seconds = (start_time - current_time).total_seconds()
-              print(f"Current time (Local): {current_time.strftime("%H:%M %Z")}")
-              print(f"Target start time: {start_time.strftime("%H:%M %Z")} (converted from {start_time_str} UTC)")
-              print(f"Waiting for {int(wait_seconds/60)} minutes...")
-              time.sleep(wait_seconds)
-          else:
-              print(f"Current time ({current_time.strftime("%H:%M %Z")}) is after start time ({start_time.strftime("%H:%M %Z")}, converted from {start_time_str} UTC), proceeding immediately")
-          '
-
       - name: Checkout code
         uses: actions/checkout@v4
 
