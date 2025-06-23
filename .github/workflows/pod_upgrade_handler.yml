@@ -1,8 +1,16 @@
 name: Upgrade POD
+run-name: Upgrade POD - ${{ inputs.pod }} - ${{ github.run_id }}
+
+permissions:
+  actions: write
+  contents: read
 
 on:
   workflow_call:
     inputs:
+      runname:
+        required: true
+        type: string
       pod:
         required: true
         type: string
@@ -16,7 +24,39 @@ on:
         required: true
         type: string
 
+  workflow_dispatch:
+    inputs:
+      runname:
+        description: 'Run name for the workflow'
+        required: true
+        type: string
+        default: 'Upgrade POD'
+      pod:
+        description: 'Pod to upgrade'
+        required: true
+        type: string
+      hosts:
+        description: 'Hosts for the pod'
+        required: true
+        type: string
+      start_time:
+        description: 'Start of allowed time window (Stockholm/CET HH:MM)'
+        required: true
+        type: string
+      end_time:
+        description: 'End of allowed time window (Stockholm/CET HH:MM)'
+        required: true
+        type: string
+        
 jobs:
+  debug-hosts: 
+    runs-on: ubuntu-latest
+    name: Debug matrix hosts
+    steps:
+      - name: Debug Hosts
+        run: |
+          echo "Hosts: ${{ inputs.hosts }}"
+
   upgrade-hosts:
     runs-on: ubuntu-latest
     timeout-minutes: 720
@@ -30,12 +70,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # - name: Check time window
-      #   uses: ./.github/actions/time-window-check
-      #   with:
-      #     start_time: ${{ inputs.start_time }}
-      #     end_time: ${{ inputs.end_time }}
-      
       - name: Check Time Window for ${{ matrix.host }}
         run: |
           echo "Checking time window..."
@@ -43,20 +77,36 @@ jobs:
           python3 <<EOF
           from datetime import datetime
           import sys
+          from zoneinfo import ZoneInfo
           
           start_time_str = "${{ inputs.start_time }}"
           end_time_str = "${{ inputs.end_time }}"
           
-          start = datetime.strptime(start_time_str, "%H:%M").time()
-          end = datetime.strptime(end_time_str, "%H:%M").time()
-          now = datetime.utcnow().time()  # Or use CET if needed
+          # Convert to Stockholm timezone
+          cet = ZoneInfo('Europe/Stockholm')
+          now = datetime.now(cet)
+          
+          # Get the time window for today
+          start_time = datetime.strptime(start_time_str, "%H:%M").time()
+          end_time = datetime.strptime(end_time_str, "%H:%M").time()
+          
+          # Create full datetime objects for today's window
+          today = now.date()
+          start_dt = datetime.combine(today, start_time).replace(tzinfo=cet)
+          end_dt = datetime.combine(today, end_time).replace(tzinfo=cet)
           
           print(f"Host: ${{ matrix.host }}")
-          print(f"Start: {start}, End: {end}, Now: {now}")
+          print(f"Start time: {start_dt.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"End time: {end_dt.strftime('%Y-%m-%d %H:%M %Z')}")
+          print(f"Current time: {now.strftime('%Y-%m-%d %H:%M %Z')}")
           
-          if not (start <= now <= end):
-              print("Outside time window. Ending Upgrades.")
-              sys.exit(1) 
+          # Time window comparison
+          if not (start_time <= now.time() <= end_time):
+              print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is outside allowed window")
+              print("Ending upgrades for this host.")
+              sys.exit(1)
+          
+          print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is within allowed window, proceeding with upgrade.")
           EOF
      
       - name: Check Big Red Button on ${{ matrix.host }}
@@ -89,7 +139,7 @@ jobs:
           ANSIBLE_FORCE_COLOR: '1'
         run: |
           echo "Running upgrade script on ${{ matrix.host }}"
-          echo "Checking Start and End time ${{ inputs.start_time }} - ${{ inputs.end_time }}"
+          echo "Checking time window (${{ inputs.start_time }} - ${{ inputs.end_time }})"
           echo "Checking Big Red Button..."
           echo "Starting upgrade..."
 

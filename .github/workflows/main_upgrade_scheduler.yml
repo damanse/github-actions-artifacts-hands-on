@@ -1,8 +1,14 @@
 name: Main Upgrade Scheduler
+run-name: ${{ inputs.runname }}
 
 on:
   workflow_dispatch:
     inputs:
+      runname: 
+        description: 'Run name for the workflow'
+        required: true
+        type: string
+        default: 'Main Upgrade Scheduler'
       site:
         description: 'Site/POD Group to process'
         required: true
@@ -14,16 +20,74 @@ on:
         type: string
         default: 'BLUE'
       start_time:
-        description: 'Start of allowed time window (UTC HH:MM)'
+        description: 'Start of allowed time window (Stockholm/CET HH:MM)'
         required: true
         default: '07:30'
       end_time:
-        description: 'End of allowed time window (UTC HH:MM)'
+        description: 'End of allowed time window (Stockholm/CET HH:MM)'
         required: true
         default: '18:30'
+      start_mode:
+        description: 'Choose whether to start now or wait for scheduled time'
+        required: true
+        type: choice
+        options:
+          - now
+          - scheduled
+        default: 'scheduled'
 
 jobs:
+  wait-for-window:
+    name: Wait for Start Time Window
+    runs-on: ubuntu-latest
+    timeout-minutes: 1440  # 24 hours to handle any possible wait duration
+    steps:
+      - name: Wait until start time
+        run: |
+          python3 -u <<EOF
+          from datetime import datetime, timedelta
+          import sys
+          import time
+          from zoneinfo import ZoneInfo
+
+          start_time_str = "${{ inputs.start_time }}"
+          end_time_str = "${{ inputs.end_time }}"
+          start_mode = "${{ inputs.start_mode }}"
+          
+          # Convert to Stockholm timezone
+          cet = ZoneInfo('Europe/Stockholm')
+          now = datetime.now(cet)
+          
+          if start_mode == "now":
+              print(f"Start mode is 'now', proceeding immediately at {now.strftime('%Y-%m-%d %H:%M %Z')}", flush=True)
+              sys.exit(0)
+          
+          # Parse the time components for scheduled start
+          start_time = datetime.strptime(start_time_str, "%H:%M").time()
+          
+          # Compare times and handle next day case
+          now_time = now.time()
+          today = now.date()
+          start_datetime = datetime.combine(today, start_time).replace(tzinfo=cet)
+          
+          # If current time is past start time, we need to wait for tomorrow
+          if now_time >= start_time:
+              start_datetime = start_datetime + timedelta(days=1)
+              print(f"Current time is past today's start window, will wait until tomorrow {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}", flush=True)
+          else:
+              print(f"Current time {now.strftime('%Y-%m-%d %H:%M %Z')} is before today's start time {start_datetime.strftime('%Y-%m-%d %H:%M %Z')}, waiting...", flush=True)
+          
+          # Calculate wait time until next start time (today or tomorrow)
+          wait_seconds = (start_datetime - now).total_seconds()
+          wait_minutes = int(wait_seconds / 60)
+          
+          print(f"Waiting for {wait_minutes} minutes until {start_datetime.strftime('%Y-%m-%d %H:%M CEST')}")
+          time.sleep(wait_seconds)
+          print(f"Wait time is now reached, current time is {datetime.now(cet).strftime('%Y-%m-%d %H:%M %Z')}, proceeding with upgrades.")
+          EOF
+
   get-pods-for-upgrade:
+    needs: wait-for-window
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -69,16 +133,44 @@ jobs:
 
   run-upgrades:
     needs: get-pods-for-upgrade
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include: ${{ fromJson(needs.get-pods-for-upgrade.outputs.matrix) }}
       fail-fast: false
-    uses: ./.github/workflows/pod_upgrade_handler.yml
-    with:
-      pod: ${{ matrix.pod }}
-      hosts: ${{ toJson(matrix.hosts) }}
-      start_time: ${{ inputs.start_time }}
-      end_time: ${{ inputs.end_time }}
+
+    steps:
+      - name: Debug matrix hosts
+        run: |
+          echo "Matrix hosts: ${{ toJson(matrix.hosts) }}"
+          echo "Stringified hosts: $(echo '${{ toJson(matrix.hosts) }}' | jq -c .)"
+
+      - name: Trigger pod_upgrade_handler workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const workflow_id = "pod_upgrade_handler.yml";
+            const ref = "working-independant-workflows"; // Replace with the branch where the workflow resides
+            const inputs = {
+              runname: "POD Upgrade - ${{ matrix.pod }}",
+              pod: "${{ matrix.pod }}",
+              hosts: JSON.stringify(${{
+                toJson(matrix.hosts)
+              }}), // Properly stringify the hosts array
+              start_time: "${{ inputs.start_time }}",
+              end_time: "${{ inputs.end_time }}"
+            };
+
+            console.log("Inputs being sent to pod_upgrade_handler:");
+            console.log(inputs);
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id,
+              ref,
+              inputs
+            });
 
   cleanup:
     runs-on: ubuntu-latest
@@ -93,3 +185,4 @@ jobs:
           else
             echo "/tmp/pods.json does not exist. Nothing to delete."
           fi
+
