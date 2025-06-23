@@ -150,7 +150,34 @@ jobs:
         with:
           script: |
             const workflow_id = "pod_upgrade_handler.yml";
-            const ref = "working-independant-workflows"; // Replace with the branch where the workflow resides
+            const ref = process.env.GITHUB_REF_NAME;
+            const inputs = {
+              runname: "POD Upgrade - ${{ matrix.pod }}",
+              pod: "${{ matrix.pod }}",
+              hosts: JSON.stringify(${{
+                toJson(matrix.hosts)
+              }}), // Properly stringify the hosts array
+              start_time: "${{ inputs.start_time }}",
+              end_time: "${{ inputs.end_time }}"
+            };
+
+            console.log("Inputs being sent to pod_upgrade_handler:");
+            console.log(inputs);
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id,
+              ref,
+              inputs
+            });
+
+      - name: Trigger pod_test_handler workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const workflow_id = "pod_test_handler.yml";
+            const ref = process.env.GITHUB_REF_NAME;
             const inputs = {
               runname: "POD Upgrade - ${{ matrix.pod }}",
               pod: "${{ matrix.pod }}",
